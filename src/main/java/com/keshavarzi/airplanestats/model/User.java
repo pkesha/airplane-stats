@@ -1,6 +1,5 @@
 package com.keshavarzi.airplanestats.model;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
