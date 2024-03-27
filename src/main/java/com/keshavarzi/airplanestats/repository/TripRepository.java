@@ -7,7 +7,9 @@ import java.util.List;
 
 public interface TripRepository extends JpaRepository<Trip, Long> {
     List<Trip> findAllByUser(String email);
+
     Trip findTripById(Long Id);
+
     List<Trip> findTripByRoutes(Long routeId);
 
 }

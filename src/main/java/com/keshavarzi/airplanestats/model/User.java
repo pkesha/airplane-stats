@@ -11,8 +11,11 @@ import lombok.ToString;
 
 import java.util.List;
 
-@Getter @Setter @ToString
-@Entity @Table(name="users")
+@Getter
+@Setter
+@ToString
+@Entity
+@Table(name = "users")
 public class User {
 
     @Id

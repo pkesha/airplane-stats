@@ -17,12 +17,15 @@ import javax.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-@Getter @Setter @ToString
-@Entity @Table(name = "trip")
+@Getter
+@Setter
+@ToString
+@Entity
+@Table(name = "trip")
 public class Trip {
 
     @Id
-    @Column(name="trip_id", unique = true, nullable = false)
+    @Column(name = "trip_id", unique = true, nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
