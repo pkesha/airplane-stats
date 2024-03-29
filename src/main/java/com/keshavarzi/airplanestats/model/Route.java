@@ -26,7 +26,7 @@ public class Route {
 
     @ManyToOne
     @JoinColumn(name = "user_email", referencedColumnName = "email", nullable = false, table = "users")
-    private User user;
+    private UserEntity userEntity;
 
     @ManyToOne
     @JoinColumn(name = "trip_id", referencedColumnName = "trip_id", table = "trip")

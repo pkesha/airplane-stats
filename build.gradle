@@ -19,9 +19,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     // https://mvnrepository.com/artifact/com.healthmarketscience.jackcess/jackcess
     implementation group: 'com.healthmarketscience.jackcess', name: 'jackcess', version: '2.1.2'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    implementation 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
-    // https://mvnrepository.com/artifact/javax.persistence/javax.persistence-api
-    implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 }

@@ -9,11 +9,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class Trip {
 
     @ManyToOne
     @JoinColumn(name = "user_email", referencedColumnName = "email", nullable = false, table = "trip")
-    private User user;
+    private UserEntity userEntity;
 
     @OneToMany(mappedBy = "trip", targetEntity = Route.class)
     private List<Route> routes;

@@ -16,7 +16,7 @@ import java.util.List;
 @ToString
 @Entity
 @Table(name = "users")
-public class User {
+public class UserEntity {
 
     @Id
     @Column(name = "email", unique = true, nullable = false, table = "users")

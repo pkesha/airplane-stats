@@ -1,5 +1,6 @@
 package com.keshavarzi.airplanestats.security;
 
+import com.keshavarzi.airplanestats.model.UserEntity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,31 +12,23 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfigurationAK {
+public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests((authorize) -> authorize
-                        .anyRequest().authenticated()
+        http.authorizeHttpRequests((authorize) ->
+                        authorize.anyRequest()
+                                .authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults());
         return http.build();
     }
-
-    /**
-     *
-     * @param userDetailsService
-     * @param passwordEncoder
-     * @return
-     */
     @Bean
     public AuthenticationManager authenticationManager(
             UserDetailsService userDetailsService,
@@ -48,26 +41,29 @@ public class SecurityConfigurationAK {
     }
 
     /**
-     *
-     * @return An object for creating
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    /**
-     * This will create an object UserDetails with email, encrypted password, and roles for storage
+     * This will create a contract, UserDetails, with email, encrypted password, and roles for storage
      * @return Memory manager with UserDetails stored (username, password, role)
      */
     @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails userDetails = User.withDefaultPasswordEncoder()
-                .username("email")
+    public UserDetailsService userDetailsService(UserEntity userEntity) {
+        UserDetails admin = User.withDefaultPasswordEncoder()
+                .username("admin@admin")
                 .password("password")
+                .roles("ADMIN")
+                .build();
+
+        UserDetails userDetails = User.withDefaultPasswordEncoder()
+                .username(userEntity.getEmail())
+                .password(userEntity.getPassword())
                 .roles("USER")
                 .build();
 
-        return new InMemoryUserDetailsManager(userDetails);
+        return new InMemoryUserDetailsManager(admin, userDetails);
     }
+
+    @Bean
+    public UserEntity userModel() {
+        return new UserEntity();
+    }
+
 }
