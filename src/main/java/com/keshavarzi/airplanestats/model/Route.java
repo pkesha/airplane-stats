@@ -1,5 +1,6 @@
 package com.keshavarzi.airplanestats.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,19 +17,19 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "route")
+@Table(name = "route", schema = "user")
 public class Route {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "route_id", table = "route")
-    private Long id;
+    @Column(name = "route_id", table = "route", unique = true, nullable = false)
+    private Long routeId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_email", referencedColumnName = "email", nullable = false, table = "users")
+    @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_email", referencedColumnName = "email", table = "user", nullable = false, unique = true)
     private UserEntity userEntity;
 
-    @ManyToOne
+    @ManyToOne(targetEntity = Trip.class)
     @JoinColumn(name = "trip_id", referencedColumnName = "trip_id", table = "trip")
     private Trip trip;
 

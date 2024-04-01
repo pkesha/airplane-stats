@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,18 +16,21 @@ import java.util.List;
 @Setter
 @ToString
 @Entity
-@Table(name = "users")
+@Table(name = "user", schema = "user")
 public class UserEntity {
 
     @Id
-    @Column(name = "email", unique = true, nullable = false, table = "users")
+    @Column(name = "email", table = "user", unique = true, nullable = false)
     private String email;
 
-    @Column
+    @Column(nullable = false)
     private String password;
 
     // Exclusion is because associations impact performance
-    @OneToMany(mappedBy = "user", targetEntity = Trip.class)
+    @OneToMany(mappedBy = "userEntity", targetEntity = Trip.class, orphanRemoval = true)
     @ToString.Exclude
     private List<Trip> savedRoutes;
+
+    @OneToOne(mappedBy = "email", targetEntity = RoleEntity.class, orphanRemoval = true)
+    private RoleEntity roleEntity;
 }
