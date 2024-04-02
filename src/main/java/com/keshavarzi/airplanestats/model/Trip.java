@@ -1,6 +1,7 @@
 package com.keshavarzi.airplanestats.model;
 
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,26 +17,28 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.Collection;
 
 @Getter
 @Setter
 @ToString
 @Entity
-@Table(name = "trip", schema = "user")
+@Table(name = "trip", schema = "user_data")
 public class Trip {
 
     @Id
+    @Nonnull
     @Column(name = "trip_id", table ="trip", unique = true, nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tripId;
 
+    @Nonnull
     @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_email", referencedColumnName = "email", table = "trip", nullable = false, unique = true)
     private UserEntity userEntity;
 
     @OneToMany(mappedBy = "trip", targetEntity = Route.class)
-    private List<Route> routes;
+    private Collection<Route> routes;
 
     @Column(name = "trip_name", table = "trip")
     private String tripName;
