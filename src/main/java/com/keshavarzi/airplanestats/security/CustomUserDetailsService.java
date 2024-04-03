@@ -3,6 +3,7 @@ package com.keshavarzi.airplanestats.security;
 import com.keshavarzi.airplanestats.model.RoleEntity;
 import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserEntityRepository userEntityRepository;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     @Autowired
     public CustomUserDetailsService(UserEntityRepository userEntityRepository) {
         this.userEntityRepository = userEntityRepository;
@@ -31,7 +33,12 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .findUserEntityByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Email: " + username + " was not found."));
 
-        Collection<GrantedAuthority> grantedAuthoritiesToUser = mapRolesToAuthorities(userEntity.getRoleEntities());
+        Collection<GrantedAuthority> grantedAuthoritiesToUser;
+        try {
+            grantedAuthoritiesToUser = mapRolesToAuthorities(userEntity.getRoleEntities());
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Error adding roles to user: " + e);
+        }
         return new User(userEntity.getEmail(), userEntity.getPassword(), grantedAuthoritiesToUser);
     }
 

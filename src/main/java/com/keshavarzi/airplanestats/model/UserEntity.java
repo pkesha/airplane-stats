@@ -12,13 +12,17 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Collection;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "user", schema = "user_data")
@@ -34,15 +38,26 @@ public class UserEntity {
     private String password;
 
     // Exclusion is because associations impact performance
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     @OneToMany(mappedBy = "userEntity", targetEntity = Trip.class, orphanRemoval = true)
     @ToString.Exclude
     private Collection<Trip> savedRoutes;
 
-    // Do not need to do it on the other entity
+    // Do not need to do it on the other entity, this table will be defined for both
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = RoleEntity.class, cascade = CascadeType.ALL)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_email", table = "role", referencedColumnName = "email", nullable = false,
             foreignKey = @ForeignKey(name = "roles_users_email_fk")),
     inverseJoinColumns = @JoinColumn(name = "role_id", table = "role", referencedColumnName = "id", nullable = false,
             foreignKey = @ForeignKey(name = "user_role_role_id_fk")))
     private Collection<RoleEntity> roleEntities;
+
+    public Collection<RoleEntity> getRoleEntities() throws CloneNotSupportedException {
+        return List.copyOf(this.roleEntities);
+    }
+
+    public void setRoleEntities(Collection<RoleEntity> roleEntities) {
+        this.roleEntities = List.copyOf(roleEntities);
+    }
+
 }

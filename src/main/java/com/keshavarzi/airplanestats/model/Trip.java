@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -33,10 +34,14 @@ public class Trip {
     private Long tripId;
 
     @Nonnull
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_email", referencedColumnName = "email", table = "trip", nullable = false, unique = true)
     private UserEntity userEntity;
 
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     @OneToMany(mappedBy = "trip", targetEntity = Route.class)
     private Collection<Route> routes;
 
