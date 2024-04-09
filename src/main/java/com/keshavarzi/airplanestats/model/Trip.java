@@ -5,6 +5,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,20 +30,22 @@ public class Trip {
 
     @Id
     @Nonnull
-    @Column(name = "trip_id", table ="trip", unique = true, nullable = false)
+    @Column(name = "id", table ="trip", unique = true, nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tripId;
 
     @Nonnull
-    @Getter(AccessLevel.PACKAGE)
-    @Setter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_email", referencedColumnName = "email", table = "trip", nullable = false, unique = true)
+    @JoinColumn(name = "user_email", referencedColumnName = "email", table = "trip", nullable = false, unique = true,
+            foreignKey = @ForeignKey(name = "saved_routes_user_email_fk"))
     private UserEntity userEntity;
 
-    @Getter(AccessLevel.PACKAGE)
-    @Setter(AccessLevel.PACKAGE)
-    @OneToMany(mappedBy = "trip", targetEntity = Route.class)
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @OneToMany(mappedBy = "trip", targetEntity = Route.class, orphanRemoval = true)
     private Collection<Route> routes;
 
     @Column(name = "trip_name", table = "trip")
@@ -53,4 +56,22 @@ public class Trip {
 
     @Column(name = "trip_end", table = "trip")
     private ZonedDateTime tripEnd;
+
+//    @Nonnull
+//    public UserEntity getUserEntity() throws CloneNotSupportedException {
+//        return this.userEntity.clone();
+//    }
+//
+//    public void setUserEntity(@Nonnull UserEntity userEntity) throws CloneNotSupportedException {
+//        this.userEntity = userEntity.clone();
+//    }
+//
+//    public Collection<Route> getRoutes() {
+//        return List.copyOf(this.routes);
+//    }
+//
+//    public void setRoutes(Collection<Route> routes) {
+//        this.routes = List.copyOf(routes);
+//    }
+
 }

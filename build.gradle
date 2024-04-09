@@ -38,5 +38,5 @@ tasks.named('test') {
 }
 
 bootRun {
-    args = ["--spring.profiles.active=" + "dev"]
+    systemProperty "spring.profiles.active", 'application-dev.properties'
 }

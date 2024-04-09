@@ -5,6 +5,7 @@ import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.model.request.RegisterRequest;
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,15 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.regex.Pattern;
 
-@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("EI_EXPOSE_REP2")
 @RestController
 @RequestMapping(path = "api/authorization", name = "AuthorizationController")
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthorizationController {
     private UserEntityRepository userEntityRepository;
     private RoleEntityRepository roleEntityRepository;
     private PasswordEncoder passwordEncoder;
-    private final Pattern VALID_EMAIL_ADDRESS_REGEX =
+    private static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     @PostMapping(path = "register", name = "RegisterUser", consumes = "application/json")

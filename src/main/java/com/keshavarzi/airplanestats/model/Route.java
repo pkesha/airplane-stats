@@ -4,6 +4,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,22 +26,24 @@ public class Route {
     @Id
     @Nonnull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "route_id", table = "route", unique = true, nullable = false)
+    @Column(name = "id", table = "route", unique = true, nullable = false)
     private Long routeId;
 
     // Returning a reference to a mutable object value stored in one of the object's fields exposes the internal representation of the object.
     // If instances are accessed by untrusted code, and unchecked changes to the mutable object would compromise security or other important properties,
     @Nonnull
-    @Getter(AccessLevel.PACKAGE)
-    @Setter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_email", referencedColumnName = "email", table = "user", nullable = false, unique = true)
+    @JoinColumn(name = "user_email", referencedColumnName = "email", table = "route", nullable = false, unique = true,
+            foreignKey = @ForeignKey(name = "route_user_email_fk"))
     private UserEntity userEntity;
 
-    @Getter(AccessLevel.PACKAGE)
-    @Setter(AccessLevel.PACKAGE)
-    @ManyToOne(targetEntity = Trip.class)
-    @JoinColumn(name = "trip_id", referencedColumnName = "trip_id", table = "trip")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    @ManyToOne(targetEntity = Trip.class, cascade = CascadeType.ALL)
+    @JoinColumn(name = "trip_id", referencedColumnName = "id", table = "route",
+            foreignKey = @ForeignKey(name = "route_trip_trip_id_fk"))
     private Trip trip;
 
     @Column(name = "flight_number", table = "route")

@@ -9,8 +9,4 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, String> 
 
     Optional<UserEntity> findUserEntityByEmail(String email);
 
-    boolean deleteUserEntityByEmail(String email);
-
-    boolean updateUserEntityByEmail(String email);
-
 }
