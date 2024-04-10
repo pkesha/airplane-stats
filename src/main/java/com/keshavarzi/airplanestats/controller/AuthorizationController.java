@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,10 +21,11 @@ import java.util.Collections;
 import java.util.regex.Pattern;
 
 @RestController
-@RequestMapping(path = "api/authorization", name = "AuthorizationController")
+@RequestMapping(path = "/api/authorization", name = "AuthorizationController")
 @SuppressFBWarnings("EI_EXPOSE_REP2")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthorizationController {
+    private AuthenticationManager authenticationManager;
     private UserEntityRepository userEntityRepository;
     private RoleEntityRepository roleEntityRepository;
     private PasswordEncoder passwordEncoder;
@@ -35,9 +37,9 @@ public class AuthorizationController {
         String userEmail = registerRequest.getEmail();
         if(userEntityRepository.findUserEntityByEmail(userEmail).isPresent()
                 && roleEntityRepository.findRoleEntityByRoleName("USER").isPresent()) {
-            return new ResponseEntity<>("Email " + userEmail + " is present", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Email " + userEmail + " is present.", HttpStatus.BAD_REQUEST);
         } else if(!VALID_EMAIL_ADDRESS_REGEX.matcher(userEmail).matches()) {
-            return new ResponseEntity<>("Email " + userEmail + " is not a properly formatted email", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Email " + userEmail + " is not a properly formatted email.", HttpStatus.BAD_REQUEST);
         } else {
             UserEntity userEntity = new UserEntity();
             userEntity.setEmail(userEmail);

@@ -1,6 +1,9 @@
-POST localhost:8080/api/authorization/register
+
+# Register a user
+POST http://localhost:9092/api/authorization/register
 Content-Type: application/json
+
 {
-"email": parham.keshavarzi.7117@gmail.com
-"password": P@$$word777
+"email": "test@test.com",
+"password": "password"
 }

@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.3'
+    id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
@@ -23,6 +23,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-jcl'
     implementation 'com.github.spotbugs:spotbugs-annotations'
     implementation group: 'com.healthmarketscience.jackcess', name: 'jackcess', version: '2.1.2'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -37,6 +38,9 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+if(!project.hasProperty("port"))
+    project.ext.set("port", 8080)
+
 bootRun {
-    systemProperty "spring.profiles.active", 'application-dev.properties'
+    args += ["--server.port=${project.port}"]
 }
