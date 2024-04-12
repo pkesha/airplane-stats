@@ -46,7 +46,7 @@ class AuthorizationControllerTest {
     }
 
     //Object from Json
-    private <T> String mapFromJson(Object object)
+    private String mapFromJson(Object object)
             throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(object);
@@ -67,12 +67,12 @@ class AuthorizationControllerTest {
 
     }
 
-    @Test
-    void registerExistingEmailAddress() throws Exception {
-        RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setEmail("test@test.com");
-        registerRequest.setPassword("password");
-
-
-    }
+//    @Test
+//    void registerExistingEmailAddress() throws Exception {
+//        RegisterRequest registerRequest = new RegisterRequest();
+//        registerRequest.setEmail("test@test.com");
+//        registerRequest.setPassword("password");
+//
+//
+//    }
 }
