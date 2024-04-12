@@ -32,23 +32,26 @@ public class AuthorizationController {
     @PostMapping(path = "register", name = "RegisterUser", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
         String userEmail = registerRequest.getEmail();
+        String password = registerRequest.getPassword();
         if (!VALID_EMAIL_ADDRESS_REGEX.matcher(userEmail).matches()) {
             return new ResponseEntity<>("Email " + userEmail + " is not a properly formatted email.", HttpStatus.NOT_ACCEPTABLE);
-        } else if (userEntityRepository.findUserEntityByEmail(userEmail).isPresent()) {
+        } else if (password.length() < 6) {
+            return new ResponseEntity<>("Password must be greater than 6 characters.", HttpStatus.NOT_ACCEPTABLE);
+        } else if (this.userEntityRepository.findUserEntityByEmail(userEmail).isPresent()) {
             return new ResponseEntity<>("Email " + userEmail + " is present.", HttpStatus.CONFLICT);
-        } else if (roleEntityRepository.findRoleEntityByRoleName("USER").isEmpty()) {
-            return new ResponseEntity<>("No USER roles detected", HttpStatus.NOT_FOUND);
+        } else if (this.roleEntityRepository.findRoleEntityByRoleName("USER").isEmpty()) {
+            return new ResponseEntity<>("No USER roles detected.", HttpStatus.NOT_FOUND);
         }
         else {
             UserEntity userEntity = new UserEntity();
             userEntity.setEmail(userEmail);
-            userEntity.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+            userEntity.setPassword(this.passwordEncoder.encode(registerRequest.getPassword()));
 
-            RoleEntity roles = roleEntityRepository
+            RoleEntity roles = this.roleEntityRepository
                     .findRoleEntityByRoleName("USER")
                     .get();
             userEntity.setRoleEntities(Collections.singletonList(roles));
-            userEntityRepository.save(userEntity);
+            this.userEntityRepository.save(userEntity);
 
             return new ResponseEntity<>("User with email " + userEmail + " has been created", HttpStatus.CREATED);
         }
