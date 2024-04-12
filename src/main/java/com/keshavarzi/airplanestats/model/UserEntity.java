@@ -54,6 +54,11 @@ public class UserEntity implements Cloneable {
         return List.copyOf(this.roleEntities);
     }
 
+    /**
+     * A deep copy to set roleEntities field
+     * Deep copy is to prevent unintentional/malicious changes through reference
+     * @param roleEntities: list of role entities
+     */
     public void setRoleEntities(Collection<RoleEntity> roleEntities) {
         this.roleEntities = List.copyOf(roleEntities);
     }

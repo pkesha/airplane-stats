@@ -37,11 +37,11 @@ class AuthorizationControllerTest {
     MockMvc mockMvc;
     @Autowired
     WebApplicationContext webApplicationContext;
-    @MockBean
+    @MockBean(name = "UserEntityRepositoryMock")
     UserEntityRepository userEntityRepository;
-    @MockBean
+    @MockBean(name = "RoleEntityRepositoryMock")
     RoleEntityRepository roleEntityRepository;
-    @MockBean
+    @MockBean(name = "PasswordEncoderMock")
     PasswordEncoder passwordEncoder;
 
     @BeforeEach
@@ -50,13 +50,24 @@ class AuthorizationControllerTest {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
     }
 
-    //Object from Json
+    /**
+     * Helper function to parse object to JSON
+     * @param object: any object to parse
+     * @return object in JSON String
+     * @throws JsonProcessingException: issue processing into JSON
+     */
     private String mapFromJson(Object object)
             throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(object);
     }
 
+    /**
+     * Creates a RegisterRequest Object
+     * @param email: email of user
+     * @param password: Password
+     * @return created RegisterRequest object for test/mocks
+     */
     private RegisterRequest createRegisterRequest(String email, String password) {
         RegisterRequest registerRequest = new RegisterRequest();
         registerRequest.setEmail(email);
@@ -64,6 +75,12 @@ class AuthorizationControllerTest {
         return registerRequest;
     }
 
+    /**
+     * Creates UserEntity database Object
+     * @param email: user's email
+     * @param password: user's password
+     * @return created UserEntity object for test/mocks
+     */
     private UserEntity createUserEntity(String email, String password) {
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(email);
@@ -71,6 +88,11 @@ class AuthorizationControllerTest {
         return userEntity;
     }
 
+    /**
+     * Creates a RoleEntity object
+     * @param roleName: name of the role
+     * @return created RoleEntity object for test/mocks
+     */
     private RoleEntity createRoleEntity(String roleName) {
         RoleEntity roleEntity = new RoleEntity();
         roleEntity.setRoleName(roleName);
@@ -78,7 +100,7 @@ class AuthorizationControllerTest {
     }
 
     @Test
-    void registerInvalidUserEmailAddress() throws Exception {
+    void registerInvalidUserEmailAddressWith406() throws Exception {
         // Given
         String email = "";
         String password = "password";
@@ -102,7 +124,7 @@ class AuthorizationControllerTest {
     }
 
     @Test
-    void registerWithInvalidPassword() throws Exception {
+    void registerWithInvalidPasswordWith406() throws Exception {
         // Given
         String email = "registerWithInvalidPassword@test.com";
         String password = "";
@@ -125,7 +147,7 @@ class AuthorizationControllerTest {
     }
 
     @Test
-    void registerUserWithUserRoleMissing() throws Exception {
+    void registerUserWithUserRoleMissingWith404() throws Exception {
         String email = "registerUserWithUserRoleMissing@test.com";
         String password = "password";
         String roleName = "USER";
@@ -145,7 +167,7 @@ class AuthorizationControllerTest {
     }
 
     @Test
-    void registerExistingUserValidEmailAddress() throws Exception {
+    void registerExistingUserValidEmailAddressWith409() throws Exception {
         // Given
         String email = "registerExistingUserValidEmailAddress@test.com";
         String password = "password";
@@ -168,7 +190,7 @@ class AuthorizationControllerTest {
     }
 
     @Test
-    void successfulRegister() throws Exception {
+    void successfulRegisterWith201() throws Exception {
         String email = "successfulRegister@test.com";
         String password = "password";
         String roleName = "USER";

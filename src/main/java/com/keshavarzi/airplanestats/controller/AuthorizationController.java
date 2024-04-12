@@ -29,6 +29,17 @@ public class AuthorizationController {
     private RoleEntityRepository roleEntityRepository;
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Register a new user with email and password
+     * @param registerRequest: DTO to create user
+     * @return:
+     * HttpStatus.NOT_ACCEPTABLE: Invalid username or password
+     * HttpStatus.CONFLICT: Existing Email in database (plane_stats.user_data.user)
+     * HttpStatus.NOT_FOUND: 'USER' Spring security role not present in database (plane_stats.user_data.role).
+     *      Roles should exist in database at all times
+     * HttpStatus.CREATED: User has been created with encoded password & stored in database (plane_stats.user_data.user)
+     *      as a 'USER' Spring security user
+     */
     @PostMapping(path = "register", name = "RegisterUser", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
         String userEmail = registerRequest.getEmail();

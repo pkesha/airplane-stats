@@ -26,11 +26,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         this.userEntityRepository = userEntityRepository;
     }
 
+    /**
+     * Will load user by email, and associate a Spring Security role
+     * @param email the email identifying the user whose data is required.
+     * @return returns a Spring User object
+     * @throws UsernameNotFoundException: Email is not found
+     */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = this.userEntityRepository
-                .findUserEntityByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Email: " + username + " was not found."));
+                .findUserEntityByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email: " + email + " was not found."));
 
         Collection<GrantedAuthority> grantedAuthoritiesToUser;
         try {
@@ -41,10 +47,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return new User(userEntity.getEmail(), userEntity.getPassword(), grantedAuthoritiesToUser);
     }
 
+    /**
+     * Use Spring security roles to associate with a user
+     * @param roleEntities: will send in list of roleEntities
+     * @return List of Spring Security Roles
+     */
     private Collection<GrantedAuthority> mapRolesToAuthorities(Collection<RoleEntity> roleEntities) {
         return roleEntities.stream()
-                .map((roleEntity) -> new SimpleGrantedAuthority(
-                        roleEntity.getRoleName()))
+                .map((roleEntity) ->
+                        new SimpleGrantedAuthority(roleEntity.getRoleName()))
                 .collect(Collectors.toCollection(List::of));
     }
 
