@@ -26,8 +26,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 @SpringBootTest(classes = AuthorizationController.class)
 class AuthorizationControllerTest {
-    private final String BASE_AUTHORIZATION_URL = "/api/authorization";
-    private final String REGISTER_URL = "/register";
+    private static final String BASE_AUTHORIZATION_URL = "/api/authorization";
+    private static final String REGISTER_URL = "/register";
     @Autowired
     MockMvc mockMvc;
     @Autowired

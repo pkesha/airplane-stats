@@ -36,12 +36,20 @@ public class AuthorizationController {
             return new ResponseEntity<>("Email " + userEmail + " is not a properly formatted email.", HttpStatus.NOT_ACCEPTABLE);
         } else if (userEntityRepository.findUserEntityByEmail(userEmail).isPresent()) {
             return new ResponseEntity<>("Email " + userEmail + " is present.", HttpStatus.CONFLICT);
-        } else {
+        } else if (roleEntityRepository.findRoleEntityByRoleName("USER").isEmpty()) {
+            return new ResponseEntity<>("No USER roles detected", HttpStatus.NOT_FOUND);
+        }
+        else {
             UserEntity userEntity = new UserEntity();
             userEntity.setEmail(userEmail);
             userEntity.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
-            RoleEntity roles = roleEntityRepository.findRoleEntityByRoleName("USER").get();
+            RoleEntity roleEntity = new RoleEntity();
+            roleEntity.setRoleName("USER");
+
+            RoleEntity roles = roleEntityRepository
+                    .findRoleEntityByRoleName("USER")
+                    .get();
             userEntity.setRoleEntities(Collections.singletonList(roles));
             userEntityRepository.save(userEntity);
 
