@@ -25,7 +25,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "user", schema = "user_data")
-public class UserEntity implements Cloneable{
+public class UserEntity implements Cloneable {
 
     @Id
     @Nonnull
@@ -46,8 +46,8 @@ public class UserEntity implements Cloneable{
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = RoleEntity.class)
     @JoinTable(name = "user_role", schema = "user_data", joinColumns = @JoinColumn(name = "user_email", table = "user_data.role", referencedColumnName = "email", nullable = false,
             foreignKey = @ForeignKey(name = "roles_users_email_fk")),
-    inverseJoinColumns = @JoinColumn(name = "role_id", table = "role", referencedColumnName = "id", nullable = false,
-            foreignKey = @ForeignKey(name = "user_role_role_id_fk")))
+            inverseJoinColumns = @JoinColumn(name = "role_id", table = "role", referencedColumnName = "id", nullable = false,
+                    foreignKey = @ForeignKey(name = "user_role_role_id_fk")))
     private Collection<RoleEntity> roleEntities;
 
     public Collection<RoleEntity> getRoleEntities() throws CloneNotSupportedException {

@@ -21,7 +21,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "route", schema = "user_data")
-public class Route {
+public class RouteEntity {
 
     @Id
     @Nonnull

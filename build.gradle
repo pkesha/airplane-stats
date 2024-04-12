@@ -24,11 +24,14 @@ dependencies {
     implementation 'com.github.spotbugs:spotbugs-annotations'
     implementation group: 'com.healthmarketscience.jackcess', name: 'jackcess', version: '2.1.2'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.projectlombok:lombok'
+
     annotationProcessor 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
+
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -38,9 +41,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-if(!project.hasProperty("port"))
-    project.ext.set("port", 8080)
-
 bootRun {
-    args += ["--server.port=${project.port}"]
+
 }

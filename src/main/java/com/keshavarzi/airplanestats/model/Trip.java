@@ -30,7 +30,7 @@ public class Trip {
 
     @Id
     @Nonnull
-    @Column(name = "id", table ="trip", unique = true, nullable = false)
+    @Column(name = "id", table = "trip", unique = true, nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tripId;
 
@@ -45,8 +45,8 @@ public class Trip {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
-    @OneToMany(mappedBy = "trip", targetEntity = Route.class, orphanRemoval = true)
-    private Collection<Route> routes;
+    @OneToMany(mappedBy = "trip", targetEntity = RouteEntity.class, orphanRemoval = true)
+    private Collection<RouteEntity> routeEntities;
 
     @Column(name = "trip_name", table = "trip")
     private String tripName;
@@ -66,12 +66,12 @@ public class Trip {
 //        this.userEntity = userEntity.clone();
 //    }
 //
-//    public Collection<Route> getRoutes() {
-//        return List.copyOf(this.routes);
+//    public Collection<RouteEntity> getRoutes() {
+//        return List.copyOf(this.routeEntities);
 //    }
 //
-//    public void setRoutes(Collection<Route> routes) {
-//        this.routes = List.copyOf(routes);
+//    public void setRoutes(Collection<RouteEntity> routeEntities) {
+//        this.routeEntities = List.copyOf(routeEntities);
 //    }
 
 }
