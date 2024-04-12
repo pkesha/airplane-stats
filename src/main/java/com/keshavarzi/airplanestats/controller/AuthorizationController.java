@@ -44,9 +44,6 @@ public class AuthorizationController {
             userEntity.setEmail(userEmail);
             userEntity.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
-            RoleEntity roleEntity = new RoleEntity();
-            roleEntity.setRoleName("USER");
-
             RoleEntity roles = roleEntityRepository
                     .findRoleEntityByRoleName("USER")
                     .get();

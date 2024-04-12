@@ -41,8 +41,14 @@ class AuthorizationControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        try {
+            MockitoAnnotations.openMocks(this);
+        }  catch (Exception e) {
+            System.out.println(this.getClass() + " setup exception: " + e);
+        }
+        finally {
+            this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        }
     }
 
     //Object from Json
