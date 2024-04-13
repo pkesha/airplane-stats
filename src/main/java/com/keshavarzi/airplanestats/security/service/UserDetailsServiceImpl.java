@@ -1,4 +1,4 @@
-package com.keshavarzi.airplanestats.security;
+package com.keshavarzi.airplanestats.security.service;
 
 import com.keshavarzi.airplanestats.model.RoleEntity;
 import com.keshavarzi.airplanestats.model.UserEntity;

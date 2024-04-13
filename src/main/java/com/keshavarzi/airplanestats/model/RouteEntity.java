@@ -35,8 +35,8 @@ public class RouteEntity {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_email", referencedColumnName = "email", table = "route", nullable = false, unique = true,
-            foreignKey = @ForeignKey(name = "route_user_email_fk"))
+    @JoinColumn(name = "user_id", referencedColumnName = "id", table = "route", nullable = false, unique = true,
+            foreignKey = @ForeignKey(name = "route_user_id_fk"))
     private UserEntity userEntity;
 
     @Getter(AccessLevel.NONE)

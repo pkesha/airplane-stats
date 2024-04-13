@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -29,6 +31,11 @@ public class UserEntity implements Cloneable {
 
     @Id
     @Nonnull
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", table = "user", unique = true, nullable = false)
+    private Long id;
+
+    @Nonnull
     @Column(name = "email", table = "user", unique = true, nullable = false)
     private String email;
 
@@ -36,16 +43,21 @@ public class UserEntity implements Cloneable {
     @Column(name = "password", table = "user", nullable = false)
     private String password;
 
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "userEntity", targetEntity = RouteEntity.class, orphanRemoval = true, cascade = CascadeType.ALL)
+    private Collection<RouteEntity> savedRoutes;
+
     // Exclusion is because associations impact performance
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "userEntity", targetEntity = Trip.class, orphanRemoval = true, cascade = CascadeType.ALL)
-    private Collection<Trip> savedRoutes;
+    private Collection<Trip> savedTrips;
 
     // Do not need to do it on the other entity, this table will be defined for both
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = RoleEntity.class)
-    @JoinTable(name = "user_role", schema = "user_data", joinColumns = @JoinColumn(name = "user_email", table = "user_data.role", referencedColumnName = "email", nullable = false,
-            foreignKey = @ForeignKey(name = "roles_users_email_fk")),
+    @JoinTable(name = "user_role", schema = "user_data", joinColumns = @JoinColumn(name = "user_id", table = "user_data.role", referencedColumnName = "id", nullable = false,
+            foreignKey = @ForeignKey(name = "user_role_user_id_fk")),
             inverseJoinColumns = @JoinColumn(name = "role_id", table = "role", referencedColumnName = "id", nullable = false,
                     foreignKey = @ForeignKey(name = "user_role_role_id_fk")))
     private Collection<RoleEntity> roleEntities;
