@@ -19,11 +19,10 @@ public class SecurityConfiguration {
     private static final String AUTHORIZED_URL = "/api/authorization/**";
 
     /**
-     * Security filter for endpoints, certain endpoints require certain users
-     * Disable CSRF if it's being used as a backend application
-     * Enable CSRF if project is being used with front end package
-     *
-     * @param http contains url endpoint
+     * <p> Security filter for endpoints, certain endpoints require certain users</p>
+     * <p> Disable CSRF if it's being used as a backend application</p>
+     * <p> Enable CSRF if project is being used with front end package</p>
+     * @param http with SecurityFilterChain
      * @return url with security filter chain and headers
      * @throws Exception if things go wrong
      */
@@ -41,9 +40,9 @@ public class SecurityConfiguration {
     }
 
     /**
-     * Will create the authentication manager bean
-     * @param authenticationConfiguration: Authentication Configuration object to make into a bean
-     * @return bean of configuration manager
+     * <p>Will create the authentication manager bean</p>
+     * @param authenticationConfiguration Authentication Configuration object to make into a bean
+     * @return AuthenticationManager bean
      * @throws Exception throws exception if things don't work??
      */
     @Bean(name = "AuthenticationManager")
@@ -53,8 +52,8 @@ public class SecurityConfiguration {
     }
 
     /**
-     * Create password encoder bean
-     * @return password encoder bean
+     * <p>Create password encoder bean</p>
+     * @return PasswordEncoder bean
      */
     @Bean(name = "PasswordEncoder")
     public PasswordEncoder passwordEncoder() {

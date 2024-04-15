@@ -2,11 +2,13 @@ package com.keshavarzi.airplanestats.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.keshavarzi.airplanestats.model.RoleEntity;
+import com.keshavarzi.airplanestats.exception.register.AuthorizationRoleMissingException;
+import com.keshavarzi.airplanestats.exception.register.EmailExistException;
+import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
+import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.model.request.RegisterRequest;
-import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
-import com.keshavarzi.airplanestats.repository.UserEntityRepository;
+import com.keshavarzi.airplanestats.security.service.UserDetailsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,13 +19,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebM
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -37,12 +36,8 @@ class AuthorizationControllerTest {
     MockMvc mockMvc;
     @Autowired
     WebApplicationContext webApplicationContext;
-    @MockBean(name = "UserEntityRepositoryMock")
-    UserEntityRepository userEntityRepository;
-    @MockBean(name = "RoleEntityRepositoryMock")
-    RoleEntityRepository roleEntityRepository;
-    @MockBean(name = "PasswordEncoderMock")
-    PasswordEncoder passwordEncoder;
+    @MockBean
+    UserDetailsServiceImpl userDetailsService;
 
     @BeforeEach
     void setUp() {
@@ -83,37 +78,22 @@ class AuthorizationControllerTest {
      */
     private UserEntity createUserEntity(String email, String password) {
         UserEntity userEntity = new UserEntity();
+        userEntity.setUserId(1L);
         userEntity.setEmail(email);
         userEntity.setPassword(password);
         return userEntity;
     }
 
-    /**
-     * Creates a RoleEntity object
-     * @param roleName: name of the role
-     * @return created RoleEntity object for test/mocks
-     */
-    private RoleEntity createRoleEntity(String roleName) {
-        RoleEntity roleEntity = new RoleEntity();
-        roleEntity.setRoleName(roleName);
-        return roleEntity;
-    }
-
     @Test
     void registerInvalidUserEmailAddressWith406() throws Exception {
         // Given
-        String email = "";
+        String email = "registerInvalidUserEmailAddressWith406";
         String password = "password";
-        String roleName = "USER";
-        UserEntity userEntity = this.createUserEntity(email, password);
-        RoleEntity roleEntity = this.createRoleEntity(roleName);
         RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
         // When
-        Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
-                .thenReturn(Optional.of(userEntity));
-        Mockito.when(this.roleEntityRepository.findRoleEntityByRoleName(roleName))
-                .thenReturn(Optional.of(roleEntity));
+        Mockito.when(this.userDetailsService.register(email, password))
+                .thenThrow(InvalidEmailException.class);
 
         // When & then
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
@@ -128,16 +108,11 @@ class AuthorizationControllerTest {
         // Given
         String email = "registerWithInvalidPassword@test.com";
         String password = "";
-        String roleName = "USER";
-        UserEntity userEntity = this.createUserEntity(email, password);
-        RoleEntity roleEntity = this.createRoleEntity(roleName);
         RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
         // When
-        Mockito.when(userEntityRepository.findUserEntityByEmail(email))
-                .thenReturn(Optional.of(userEntity));
-        Mockito.when(roleEntityRepository.findRoleEntityByRoleName(roleName))
-                .thenReturn(Optional.of(roleEntity));
+        Mockito.when(this.userDetailsService.register(email, password))
+                        .thenThrow(InvalidPasswordException.class);
 
         // When & then
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
@@ -150,14 +125,11 @@ class AuthorizationControllerTest {
     void registerUserWithUserRoleMissingWith404() throws Exception {
         String email = "registerUserWithUserRoleMissing@test.com";
         String password = "password";
-        String roleName = "USER";
         RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
         // When
-        Mockito.when(userEntityRepository.findUserEntityByEmail(email))
-                .thenReturn(Optional.empty());
-        Mockito.when(roleEntityRepository.findRoleEntityByRoleName(roleName))
-                .thenReturn(Optional.empty());
+        Mockito.when(this.userDetailsService.register(email, password))
+                        .thenThrow(AuthorizationRoleMissingException.class);
 
         // When Then
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
@@ -171,16 +143,11 @@ class AuthorizationControllerTest {
         // Given
         String email = "registerExistingUserValidEmailAddress@test.com";
         String password = "password";
-        String roleName = "USER";
-        UserEntity userEntity = this.createUserEntity(email, password);
-        RoleEntity roleEntity = this.createRoleEntity(roleName);
         RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
         // When
-        Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
-                .thenReturn(Optional.of(userEntity));
-        Mockito.when(roleEntityRepository.findRoleEntityByRoleName(roleName))
-                .thenReturn(Optional.of(roleEntity));
+        Mockito.when(this.userDetailsService.register(email, password))
+                .thenThrow(EmailExistException.class);
 
         // Then
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
@@ -193,18 +160,12 @@ class AuthorizationControllerTest {
     void successfulRegisterWith201() throws Exception {
         String email = "successfulRegister@test.com";
         String password = "password";
-        String roleName = "USER";
         RegisterRequest registerRequest = this.createRegisterRequest(email, password);
-        RoleEntity roleEntity = this.createRoleEntity(roleName);
-
+        UserEntity userEntity = this.createUserEntity(email, password);
 
         // When
-        Mockito.when(userEntityRepository.findUserEntityByEmail(email))
-                .thenReturn(Optional.empty());
-        Mockito.when(roleEntityRepository.findRoleEntityByRoleName(roleName))
-                .thenReturn(Optional.of(roleEntity));
-        Mockito.when(this.passwordEncoder.encode(registerRequest.getPassword()))
-                        .thenReturn("encodedPassword");
+        Mockito.when(this.userDetailsService.register(email, password))
+                        .thenReturn(userEntity);
 
         // When Then
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)

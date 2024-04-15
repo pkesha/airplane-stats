@@ -36,6 +36,7 @@ class SecurityConfigurationTest {
         Assertions.assertNotNull(securityConfiguration.passwordEncoder());
     }
 
+    //TODO: returnAuthenticationManager Junit test
     @Test
     void returnAuthenticationManager() {
 //        SecurityConfiguration securityConfiguration = new SecurityConfiguration();

@@ -33,7 +33,7 @@ public class UserEntity implements Cloneable {
     @Nonnull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", table = "user", unique = true, nullable = false)
-    private Long id;
+    private Long userId;
 
     @Nonnull
     @Column(name = "email", table = "user", unique = true, nullable = false)
@@ -67,9 +67,9 @@ public class UserEntity implements Cloneable {
     }
 
     /**
-     * A deep copy to set roleEntities field
-     * Deep copy is to prevent unintentional/malicious changes through reference
-     * @param roleEntities: list of role entities
+     * <p>A deep copy to set roleEntities field.
+     * Deep copy is to prevent unintentional/malicious changes through reference</p>
+     * @param roleEntities list of role entities
      */
     public void setRoleEntities(Collection<RoleEntity> roleEntities) {
         this.roleEntities = List.copyOf(roleEntities);
