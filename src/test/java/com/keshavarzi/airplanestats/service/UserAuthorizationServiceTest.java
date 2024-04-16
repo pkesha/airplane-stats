@@ -16,6 +16,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -38,6 +42,8 @@ public class UserAuthorizationServiceTest {
     @MockBean
     RoleEntityRepository roleEntityRepository;
     @MockBean
+    AuthenticationManager authenticationManager;
+    @MockBean
     PasswordEncoder passwordEncoder;
 
     UserAuthorizationService userAuthorizationService;
@@ -45,7 +51,8 @@ public class UserAuthorizationServiceTest {
     @BeforeEach
     void setUp() {
         this.userAuthorizationService =
-                new UserAuthorizationService(this.userEntityRepository, this.roleEntityRepository, this.passwordEncoder);
+                new UserAuthorizationService(this.userEntityRepository, this.roleEntityRepository,
+                        this.authenticationManager, this.passwordEncoder);
     }
 
     /**
@@ -143,5 +150,51 @@ public class UserAuthorizationServiceTest {
                 .thenReturn(userEntity);
 
         assertEquals(userEntity, this.userAuthorizationService.register(email, password));
+    }
+
+    @Test
+    void loginFailedEmailNotFound() {
+        String email = "emailDoesNotExist@test.com";
+        String password = "validPass";
+
+        Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+                .thenReturn(Optional.empty());
+
+        assertThrows(UsernameNotFoundException.class,
+                () -> this.userAuthorizationService.login(email, password));
+    }
+
+    @Test
+    void loginFailedAuthentication() {
+        String email = "loginFailedAuthentication@test.com";
+        String password = "invalidPass";
+
+        UserEntity userEntity = this.createUserEntity(email, password);
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                new UsernamePasswordAuthenticationToken(email, password);
+
+        Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+                .thenReturn(Optional.of(userEntity));
+        Mockito.when(this.authenticationManager.authenticate(usernamePasswordAuthenticationToken))
+                .thenThrow(new RuntimeException());
+
+        assertThrows(RuntimeException.class,
+                () -> this.userAuthorizationService.login(email, password));
+    }
+
+    @Test
+    void successfulLogin() {
+        String email = "loginFailedAuthentication@test.com";
+        String password = "invalidPass";
+
+        UserEntity userEntity = this.createUserEntity(email, password);
+        Authentication authentication = this.authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
+
+        Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+                .thenReturn(Optional.of(userEntity));
+
+        Mockito.when(this.authenticationManager.authenticate(authentication))
+                .thenReturn(authentication);
     }
 }

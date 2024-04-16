@@ -9,8 +9,11 @@ import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +26,7 @@ public class UserAuthorizationService {
 
     private UserEntityRepository userEntityRepository;
     private RoleEntityRepository roleEntityRepository;
+    private final AuthenticationManager authenticationManager;
     private PasswordEncoder passwordEncoder;
     private static final Pattern VALID_EMAIL_ADDRESS =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
@@ -61,8 +65,14 @@ public class UserAuthorizationService {
         }
     }
 
-    public void login(Authentication authentication) {
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    public void login(String email, String password) {
+        if(this.userEntityRepository.findUserEntityByEmail(email).isEmpty()) {
+            throw new UsernameNotFoundException(email + "not found");
+        } else {
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(email, password));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
     }
 
 }

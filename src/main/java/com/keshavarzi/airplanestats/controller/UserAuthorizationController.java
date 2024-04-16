@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAuthorizationController {
 
     private UserAuthorizationService userAuthorizationService;
-    private final AuthenticationManager authenticationManager;
 
     /**
      * Register a new user with email and password
@@ -56,11 +53,15 @@ public class UserAuthorizationController {
         }
     }
 
-    @PostMapping(path = "login", name = "UserLogin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "login", name = "UserLogin",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        this.userAuthorizationService.login(authentication);
+
+        try {
+            this.userAuthorizationService.login(loginRequest.getEmail(), loginRequest.getPassword());
+        } catch (UsernameNotFoundException usernameNotFoundException) {
+            return new ResponseEntity<>(usernameNotFoundException.getMessage(), HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>("Successful login", HttpStatus.OK);
     }
 }
