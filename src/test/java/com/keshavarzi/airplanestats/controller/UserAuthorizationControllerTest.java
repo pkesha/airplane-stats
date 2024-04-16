@@ -8,7 +8,7 @@ import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.model.request.RegisterRequest;
-import com.keshavarzi.airplanestats.security.service.UserDetailsServiceImpl;
+import com.keshavarzi.airplanestats.service.UserAuthorizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebM
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -28,16 +29,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @AutoConfigureWebMvc
 @AutoConfigureMockMvc
-@SpringBootTest(classes = AuthorizationController.class)
-class AuthorizationControllerTest {
-    private static final String BASE_AUTHORIZATION_URL = "/api/authorization";
+@SpringBootTest(classes = UserAuthorizationController.class)
+class UserAuthorizationControllerTest {
+    private static final String BASE_AUTHORIZATION_URL = "/api/user/authorization";
     private static final String REGISTER_URL = "/register";
     @Autowired
     MockMvc mockMvc;
     @Autowired
     WebApplicationContext webApplicationContext;
     @MockBean
-    UserDetailsServiceImpl userDetailsService;
+    UserAuthorizationService userAuthorizationService;
+    @MockBean
+    AuthenticationManager authenticationManager;
 
     @BeforeEach
     void setUp() {
@@ -92,7 +95,7 @@ class AuthorizationControllerTest {
         RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
         // When
-        Mockito.when(this.userDetailsService.register(email, password))
+        Mockito.when(this.userAuthorizationService.register(email, password))
                 .thenThrow(InvalidEmailException.class);
 
         // When & then
@@ -111,7 +114,7 @@ class AuthorizationControllerTest {
         RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
         // When
-        Mockito.when(this.userDetailsService.register(email, password))
+        Mockito.when(this.userAuthorizationService.register(email, password))
                         .thenThrow(InvalidPasswordException.class);
 
         // When & then
@@ -128,7 +131,7 @@ class AuthorizationControllerTest {
         RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
         // When
-        Mockito.when(this.userDetailsService.register(email, password))
+        Mockito.when(this.userAuthorizationService.register(email, password))
                         .thenThrow(AuthorizationRoleMissingException.class);
 
         // When Then
@@ -146,7 +149,7 @@ class AuthorizationControllerTest {
         RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
         // When
-        Mockito.when(this.userDetailsService.register(email, password))
+        Mockito.when(this.userAuthorizationService.register(email, password))
                 .thenThrow(EmailExistException.class);
 
         // Then
@@ -164,7 +167,7 @@ class AuthorizationControllerTest {
         UserEntity userEntity = this.createUserEntity(email, password);
 
         // When
-        Mockito.when(this.userDetailsService.register(email, password))
+        Mockito.when(this.userAuthorizationService.register(email, password))
                         .thenReturn(userEntity);
 
         // When Then

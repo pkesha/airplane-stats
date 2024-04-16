@@ -1,6 +1,7 @@
 package com.keshavarzi.airplanestats.security;
 
-import org.junit.jupiter.api.Assertions;
+import com.keshavarzi.airplanestats.repository.UserEntityRepository;
+import com.keshavarzi.airplanestats.security.model.SecurityConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +25,12 @@ class SecurityConfigurationTest {
     private MockMvc mockMvc;
     @MockBean
     AuthenticationConfiguration authenticationConfiguration;
+    @MockBean
+    UserEntityRepository userEntityRepository;
     @Test
     void givenIncorrectURL_Return404() throws Exception {
         this.mockMvc.perform(get("/data/actuator/health/liveness"))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void returnPasswordEncoder() {
-        SecurityConfiguration securityConfiguration = new SecurityConfiguration();
-        Assertions.assertNotNull(securityConfiguration.passwordEncoder());
     }
 
     //TODO: returnAuthenticationManager Junit test

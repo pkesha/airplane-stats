@@ -1,4 +1,4 @@
-package com.keshavarzi.airplanestats.security;
+package com.keshavarzi.airplanestats.security.model;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ public class SecurityConfiguration {
      * @return url with security filter chain and headers
      * @throws Exception if things go wrong
      */
-    @Bean(name = "SecurityFilterChain")
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -40,12 +40,12 @@ public class SecurityConfiguration {
     }
 
     /**
-     * <p>Will create the authentication manager bean</p>
+     * Will create the authentication manager bean
      * @param authenticationConfiguration Authentication Configuration object to make into a bean
      * @return AuthenticationManager bean
      * @throws Exception throws exception if things don't work??
      */
-    @Bean(name = "AuthenticationManager")
+    @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();

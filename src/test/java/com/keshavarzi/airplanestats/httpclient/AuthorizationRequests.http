@@ -1,9 +1,17 @@
-
-# Register a user
-POST http://localhost:9092/api/authorization/register
+### Register a user
+POST http://localhost:9092/api/user/authorization/register
 Content-Type: application/json
 
 {
-  "email": "test2@test.com",
+  "email": "test3@test.com",
+  "password": "password"
+}
+
+### Login
+POST http://localhost:9092/api/user/authorization/login
+Content-Type: application/json
+
+{
+  "email": "test3@test.com",
   "password": "password"
 }

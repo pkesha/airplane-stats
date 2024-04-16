@@ -4,23 +4,29 @@ import com.keshavarzi.airplanestats.exception.register.AuthorizationRoleMissingE
 import com.keshavarzi.airplanestats.exception.register.EmailExistException;
 import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
+import com.keshavarzi.airplanestats.model.request.LoginRequest;
 import com.keshavarzi.airplanestats.model.request.RegisterRequest;
-import com.keshavarzi.airplanestats.security.service.UserDetailsServiceImpl;
+import com.keshavarzi.airplanestats.service.UserAuthorizationService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path = "/api/authorization", name = "AuthorizationController")
+@RequestMapping(path = "/api/user/authorization", name = "UserAuthorizationController")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
-public class AuthorizationController {
-    private UserDetailsServiceImpl userDetailsService;
+public class UserAuthorizationController {
+
+    private UserAuthorizationService userAuthorizationService;
+    private final AuthenticationManager authenticationManager;
 
     /**
      * Register a new user with email and password
@@ -39,7 +45,7 @@ public class AuthorizationController {
     public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
         String email = registerRequest.getEmail();
         try {
-            this.userDetailsService.register(email, registerRequest.getPassword());
+            this.userAuthorizationService.register(email, registerRequest.getPassword());
             return new ResponseEntity<>("User with email " + email + " has been created", HttpStatus.CREATED);
         } catch (InvalidEmailException | InvalidPasswordException invalidCredentials) {
             return new ResponseEntity<>(invalidCredentials.getMessage(), HttpStatus.NOT_ACCEPTABLE);
@@ -48,5 +54,13 @@ public class AuthorizationController {
         } catch (AuthorizationRoleMissingException authorizationRoleMissingException) {
             return new ResponseEntity<>(authorizationRoleMissingException.getMessage(), HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping(path = "login", name = "UserLogin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        this.userAuthorizationService.login(authentication);
+        return new ResponseEntity<>("Successful login", HttpStatus.OK);
     }
 }
