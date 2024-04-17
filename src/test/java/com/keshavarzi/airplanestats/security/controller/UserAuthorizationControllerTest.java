@@ -1,4 +1,4 @@
-package com.keshavarzi.airplanestats.controller;
+package com.keshavarzi.airplanestats.security.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,8 +7,9 @@ import com.keshavarzi.airplanestats.exception.register.EmailExistException;
 import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.UserEntity;
+import com.keshavarzi.airplanestats.model.request.LoginRequest;
 import com.keshavarzi.airplanestats.model.request.RegisterRequest;
-import com.keshavarzi.airplanestats.service.UserAuthorizationService;
+import com.keshavarzi.airplanestats.security.service.UserAuthorizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,11 +21,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @AutoConfigureWebMvc
@@ -33,6 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 class UserAuthorizationControllerTest {
     private static final String BASE_AUTHORIZATION_URL = "/api/user/authorization";
     private static final String REGISTER_URL = "/register";
+    private static final String LOGIN_URL = "/login";
     @Autowired
     MockMvc mockMvc;
     @Autowired
@@ -71,6 +75,13 @@ class UserAuthorizationControllerTest {
         registerRequest.setEmail(email);
         registerRequest.setPassword(password);
         return registerRequest;
+    }
+
+    private LoginRequest createLoginRequest(String email, String password) {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword(password);
+        return loginRequest;
     }
 
     /**
@@ -175,6 +186,58 @@ class UserAuthorizationControllerTest {
                         .content(this.mapFromJson(registerRequest))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    @Test
+    void unsuccessfulLoginInvalidEmail() throws Exception {
+        String email = "dne@test.com";
+        String password = "validPass";
+
+        LoginRequest loginRequest = this.createLoginRequest(email, password);
+
+        doThrow(UsernameNotFoundException.class)
+                .when(this.userAuthorizationService)
+                .login(email, password);
+
+        mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
+                .content(this.mapFromJson(loginRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    // TODO: why is this
+    @Test
+    void unsuccessfulLoginInvalidPassword() throws Exception {
+        String email = "unsuccessfulLoginInvalidPassword@test.com";
+        String password = "invalidPass";
+
+        LoginRequest loginRequest = this.createLoginRequest(email, password);
+
+        doThrow(new RuntimeException())
+                .when(this.userAuthorizationService)
+                .login(email, password);
+
+        mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
+                        .content(this.mapFromJson(loginRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    void successfulLogin() throws Exception {
+        String email = "successfulLogin@test.com";
+        String password = "password";
+
+        LoginRequest loginRequest = this.createLoginRequest(email, password);
+
+        Mockito.doNothing()
+                .when(this.userAuthorizationService)
+                .login(email, password);
+
+        mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
+                        .content(this.mapFromJson(loginRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
 }

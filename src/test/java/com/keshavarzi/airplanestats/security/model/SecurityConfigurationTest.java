@@ -1,7 +1,6 @@
-package com.keshavarzi.airplanestats.security;
+package com.keshavarzi.airplanestats.security.model;
 
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
-import com.keshavarzi.airplanestats.security.model.SecurityConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

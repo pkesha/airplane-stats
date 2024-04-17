@@ -1,4 +1,4 @@
-package com.keshavarzi.airplanestats.service;
+package com.keshavarzi.airplanestats.security.service;
 
 import com.keshavarzi.airplanestats.exception.register.AuthorizationRoleMissingException;
 import com.keshavarzi.airplanestats.exception.register.EmailExistException;
