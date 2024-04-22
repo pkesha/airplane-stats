@@ -9,6 +9,7 @@ import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.model.request.LoginRequest;
 import com.keshavarzi.airplanestats.model.request.RegisterRequest;
+import com.keshavarzi.airplanestats.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.security.service.UserAuthorizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @AutoConfigureWebMvc
@@ -192,12 +192,12 @@ class UserAuthorizationControllerTest {
     void unsuccessfulLoginInvalidEmail() throws Exception {
         String email = "dne@test.com";
         String password = "validPass";
-
         LoginRequest loginRequest = this.createLoginRequest(email, password);
+        AuthorizationResponse emptyAuthorizationResponse = new AuthorizationResponse();
 
-        doThrow(UsernameNotFoundException.class)
-                .when(this.userAuthorizationService)
-                .login(email, password);
+        Mockito.when(this.userAuthorizationService.login(email, password))
+                .thenReturn(emptyAuthorizationResponse)
+                .thenThrow(UsernameNotFoundException.class);
 
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
                 .content(this.mapFromJson(loginRequest))
@@ -205,17 +205,16 @@ class UserAuthorizationControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
-    // TODO: why is this
     @Test
     void unsuccessfulLoginInvalidPassword() throws Exception {
         String email = "unsuccessfulLoginInvalidPassword@test.com";
         String password = "invalidPass";
-
+        AuthorizationResponse emptyAuthorizationResponse = new AuthorizationResponse();
         LoginRequest loginRequest = this.createLoginRequest(email, password);
 
-        doThrow(new RuntimeException())
-                .when(this.userAuthorizationService)
-                .login(email, password);
+        Mockito.when(this.userAuthorizationService.login(email, password))
+                .thenReturn(emptyAuthorizationResponse)
+                .thenThrow(RuntimeException.class);
 
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
                         .content(this.mapFromJson(loginRequest))
@@ -227,12 +226,12 @@ class UserAuthorizationControllerTest {
     void successfulLogin() throws Exception {
         String email = "successfulLogin@test.com";
         String password = "password";
-
         LoginRequest loginRequest = this.createLoginRequest(email, password);
+        AuthorizationResponse authorizationResponse = new AuthorizationResponse();
+        authorizationResponse.setAccessToken("ValidToken");
 
-        Mockito.doNothing()
-                .when(this.userAuthorizationService)
-                .login(email, password);
+        Mockito.when(this.userAuthorizationService.login(email, password))
+                        .thenReturn(authorizationResponse);
 
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
                         .content(this.mapFromJson(loginRequest))

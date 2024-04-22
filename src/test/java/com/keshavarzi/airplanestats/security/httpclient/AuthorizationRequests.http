@@ -1,5 +1,5 @@
 ### Register a user
-POST http://localhost:9092/api/user/authorization/register
+POST http://localhost:8080/api/user/authorization/register
 Content-Type: application/json
 
 {

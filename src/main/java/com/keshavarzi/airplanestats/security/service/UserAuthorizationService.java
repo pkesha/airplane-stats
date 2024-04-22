@@ -6,8 +6,10 @@ import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.RoleEntity;
 import com.keshavarzi.airplanestats.model.UserEntity;
+import com.keshavarzi.airplanestats.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
+import com.keshavarzi.airplanestats.security.jwt.JwtGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +30,7 @@ public class UserAuthorizationService {
     private RoleEntityRepository roleEntityRepository;
     private final AuthenticationManager authenticationManager;
     private PasswordEncoder passwordEncoder;
+    private JwtGenerator jwtGenerator;
     private static final Pattern VALID_EMAIL_ADDRESS =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
@@ -65,13 +68,17 @@ public class UserAuthorizationService {
         }
     }
 
-    public void login(String email, String password) {
+    public AuthorizationResponse login(String email, String password) {
         if(this.userEntityRepository.findUserEntityByEmail(email).isEmpty()) {
             throw new UsernameNotFoundException(email + "not found");
         } else {
             Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(email, password));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            String token = this.jwtGenerator.generateToken(authentication);
+            AuthorizationResponse authorizationResponse = new AuthorizationResponse();
+            authorizationResponse.setAccessToken(token);
+            return authorizationResponse;
         }
     }
 

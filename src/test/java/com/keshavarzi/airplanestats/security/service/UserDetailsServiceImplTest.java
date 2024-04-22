@@ -4,6 +4,7 @@ import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,11 +31,11 @@ class UserDetailsServiceImplTest {
     @MockBean
     UserEntityRepository userEntityRepository;
     @MockBean
-    UserDetailsServiceImpl userDetailsService;
-    @MockBean
     PasswordEncoder passwordEncoder;
     @MockBean
     RoleEntityRepository roleEntityRepository;
+    @InjectMocks
+    UserDetailsServiceImpl userDetailsService;
 
     @BeforeEach
     void setUp() {
@@ -45,18 +46,15 @@ class UserDetailsServiceImplTest {
     @Test
     void loadUserByUsernameThatDoesNotExist() {
         String email = "loadUserByUsernameThatDoesNotExist@test.com";
-        String exceptionMessage = "Email: " + email + " was not found.";
-
 
         Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
-                .thenReturn(Optional.empty())
-                .thenThrow(new UsernameNotFoundException(exceptionMessage));
+                .thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class,
                 () -> this.userDetailsService.loadUserByUsername(email));
     }
 
-    //TODO: Successful Junit test - keep commented code but it returns an exception
+    //TODO: Successful Junit test - keep commented code but it returns an exception when it shouldn't
     @Test
     void successfulLoadOfUsernames() {
 //        String email = "successfulLoadOfUsernames@test.com";

@@ -1,6 +1,8 @@
 package com.keshavarzi.airplanestats.security.model;
 
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
+import com.keshavarzi.airplanestats.security.jwt.JwtAuthenticationEntryPoint;
+import com.keshavarzi.airplanestats.security.jwt.JwtGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,11 @@ class SecurityConfigurationTest {
     AuthenticationConfiguration authenticationConfiguration;
     @MockBean
     UserEntityRepository userEntityRepository;
+    @MockBean
+    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @MockBean
+    JwtGenerator jwtGenerator;
+
     @Test
     void givenIncorrectURL_Return404() throws Exception {
         this.mockMvc.perform(get("/data/actuator/health/liveness"))
@@ -35,8 +42,8 @@ class SecurityConfigurationTest {
     //TODO: returnAuthenticationManager Junit test
     @Test
     void returnAuthenticationManager() {
-//        SecurityConfiguration securityConfiguration = new SecurityConfiguration();
-//        Mockito.when(securityConfiguration.authenticationManager(this.authenticationConfiguration))
-//                        .thenReturn((AuthenticationManager) new Object());
+//        AuthenticationManager authenticationManager =
+//                new ProviderManager((AuthenticationProvider) authenticationConfiguration);
+//        notNull(this.securityConfiguration.authenticationManager(authenticationConfiguration));
     }
 }

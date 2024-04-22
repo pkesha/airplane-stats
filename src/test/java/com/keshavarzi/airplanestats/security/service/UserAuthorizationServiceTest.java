@@ -6,10 +6,13 @@ import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.RoleEntity;
 import com.keshavarzi.airplanestats.model.UserEntity;
+import com.keshavarzi.airplanestats.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
+import com.keshavarzi.airplanestats.security.jwt.JwtGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,8 +20,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebM
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,14 +48,16 @@ public class UserAuthorizationServiceTest {
     AuthenticationManager authenticationManager;
     @MockBean
     PasswordEncoder passwordEncoder;
-
+    @MockBean
+    JwtGenerator jwtGenerator;
+    @InjectMocks
     UserAuthorizationService userAuthorizationService;
 
     @BeforeEach
     void setUp() {
         this.userAuthorizationService =
                 new UserAuthorizationService(this.userEntityRepository, this.roleEntityRepository,
-                        this.authenticationManager, this.passwordEncoder);
+                        this.authenticationManager, this.passwordEncoder, this.jwtGenerator);
     }
 
     /**
@@ -186,15 +191,20 @@ public class UserAuthorizationServiceTest {
     void successfulLogin() {
         String email = "loginFailedAuthentication@test.com";
         String password = "invalidPass";
-
+        String token = "token";
         UserEntity userEntity = this.createUserEntity(email, password);
-        Authentication authentication = this.authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        TestingAuthenticationToken authentication = new TestingAuthenticationToken(email, password);
+        AuthorizationResponse expectedAuthorizationResponse = new AuthorizationResponse();
+        expectedAuthorizationResponse.setAccessToken(token);
 
         Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
                 .thenReturn(Optional.of(userEntity));
-
         Mockito.when(this.authenticationManager.authenticate(authentication))
                 .thenReturn(authentication);
+        Mockito.when(this.jwtGenerator.generateToken(authentication))
+                .thenReturn(token);
+
+        AuthorizationResponse actualAuthorizationResponse = this.userAuthorizationService.login(email, password);
+        assertEquals(expectedAuthorizationResponse, actualAuthorizationResponse);
     }
 }

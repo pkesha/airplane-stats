@@ -6,6 +6,7 @@ import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.request.LoginRequest;
 import com.keshavarzi.airplanestats.model.request.RegisterRequest;
+import com.keshavarzi.airplanestats.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.security.service.UserAuthorizationService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,14 +56,18 @@ public class UserAuthorizationController {
 
     @PostMapping(path = "login", name = "UserLogin",
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthorizationResponse> login(@RequestBody LoginRequest loginRequest) {
+        AuthorizationResponse authorizationResponse = new AuthorizationResponse();
         try {
-            this.userAuthorizationService.login(loginRequest.getEmail(), loginRequest.getPassword());
+            authorizationResponse =
+                    this.userAuthorizationService.login(loginRequest.getEmail(), loginRequest.getPassword());
         } catch (UsernameNotFoundException usernameNotFoundException) {
-            return new ResponseEntity<>(usernameNotFoundException.getMessage(), HttpStatus.NOT_FOUND);
+            authorizationResponse.setUnauthorizedError(usernameNotFoundException.getMessage());
+            return new ResponseEntity<>(authorizationResponse, HttpStatus.NOT_FOUND);
         } catch (RuntimeException runtimeException) {
-            return new ResponseEntity<>(runtimeException.getMessage(), HttpStatus.UNAUTHORIZED);
+            authorizationResponse.setUnauthorizedError(runtimeException.getMessage());
+            return new ResponseEntity<>(authorizationResponse, HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>("Successful login", HttpStatus.OK);
+        return new ResponseEntity<>(authorizationResponse, HttpStatus.OK);
     }
 }
