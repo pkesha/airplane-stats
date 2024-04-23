@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Rest Controller to register, login and other authorizations.
+ */
 @RestController
 @RequestMapping(path = "/api/user/authorization", name = "UserAuthorizationController")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -28,15 +31,18 @@ public final class UserAuthorizationController {
   private UserAuthorizationService userAuthorizationService;
 
   /**
-   * Register a new user with email and password
+   * Register a new user with email and password.
    *
    * @param registerRequest DTO to create user
    * @return HttpStatus.NOT_ACCEPTABLE: Invalid username or password
-   *     <p>HttpStatus.CONFLICT: Existing Email in database (plane_stats.user_data.user)
-   *     <p>HttpStatus.NOT_FOUND: 'USER' Spring security role not present in database
-   *     (plane_stats.user_data.role). Roles should exist in database at all times
-   *     <p>HttpStatus.CREATED: User has been created with encoded password & stored in database
-   *     (plane_stats.user_data.user) as a 'USER' Spring security user
+   *     <p>{@code HttpStatus.CONFLICT}: Existing Email in database (plane_stats.user_data.user)</p>
+   *     <p>{@code HttpStatus.NOT_FOUND}: 'USER' Spring security role not present in database
+   *      (plane_stats.user_data.role).
+   *      Roles should exist in database at all time.</p>
+   *
+   *     <p>{@code HttpStatus.CREATED}:
+   *      User has been created with encoded password & stored in database
+   *      (plane_stats.user_data.user) as a 'USER' Spring security user</p>
    */
   @PostMapping(
       path = "register",
@@ -59,6 +65,13 @@ public final class UserAuthorizationController {
     }
   }
 
+  /**
+   * Login API. Will catch Exceptions for Unauthorized or unknown email login attempts.
+   *
+   * @param loginRequest DTO containing email and password
+   * @return Response entity encapsulating {@code AuthorizationResponse} DTO.
+   *       DTO informs of authorization results.
+   */
   @PostMapping(
       path = "login",
       name = "UserLogin",

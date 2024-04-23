@@ -34,212 +34,220 @@ import org.springframework.web.context.WebApplicationContext;
 @AutoConfigureMockMvc
 @SpringBootTest(classes = UserAuthorizationController.class)
 class UserAuthorizationControllerTest {
-    private static final String BASE_AUTHORIZATION_URL = "/api/user/authorization";
-    private static final String REGISTER_URL = "/register";
-    private static final String LOGIN_URL = "/login";
-    @Autowired
-    MockMvc mockMvc;
-    @Autowired
-    WebApplicationContext webApplicationContext;
-    @MockBean
-    UserAuthorizationService userAuthorizationService;
-    @MockBean
-    AuthenticationManager authenticationManager;
+  private static final String BASE_AUTHORIZATION_URL = "/api/user/authorization";
+  private static final String REGISTER_URL = "/register";
+  private static final String LOGIN_URL = "/login";
+  @Autowired MockMvc mockMvc;
+  @Autowired WebApplicationContext webApplicationContext;
+  @MockBean UserAuthorizationService userAuthorizationService;
+  @MockBean AuthenticationManager authenticationManager;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-    }
+  @BeforeEach
+  void setUp() {
+    MockitoAnnotations.openMocks(this);
+    this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+  }
 
-    /**
-     * Helper function to parse object to JSON
-     *
-     * @param object: any object to parse
-     * @return object in JSON String
-     * @throws JsonProcessingException: issue processing into JSON
-     */
-    private String mapFromJson(Object object)
-            throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(object);
-    }
+  /**
+   * Helper function to parse object to JSON.
+   *
+   * @param object any object to parse
+   * @return object in JSON String
+   * @throws JsonProcessingException issue processing into JSON
+   */
+  private String mapFromJson(Object object) throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
+    return mapper.writeValueAsString(object);
+  }
 
-    /**
-     * Creates a RegisterRequest Object
-     *
-     * @param email:    email of user
-     * @param password: Password
-     * @return created RegisterRequest object for test/mocks
-     */
-    private RegisterRequest createRegisterRequest(String email, String password) {
-        RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setEmail(email);
-        registerRequest.setPassword(password);
-        return registerRequest;
-    }
+  /**
+   * Creates a RegisterRequest Object.
+   *
+   * @param email email of user
+   * @param password Password
+   * @return created RegisterRequest object for test/mocks
+   */
+  private RegisterRequest createRegisterRequest(String email, String password) {
+    RegisterRequest registerRequest = new RegisterRequest();
+    registerRequest.setEmail(email);
+    registerRequest.setPassword(password);
+    return registerRequest;
+  }
 
-    private LoginRequest createLoginRequest(String email, String password) {
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail(email);
-        loginRequest.setPassword(password);
-        return loginRequest;
-    }
+  private LoginRequest createLoginRequest(String email, String password) {
+    LoginRequest loginRequest = new LoginRequest();
+    loginRequest.setEmail(email);
+    loginRequest.setPassword(password);
+    return loginRequest;
+  }
 
-    /**
-     * Creates UserEntity database Object
-     *
-     * @param email:    user's email
-     * @param password: user's password
-     * @return created UserEntity object for test/mocks
-     */
-    private UserEntity createUserEntity(String email, String password) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUserId(1L);
-        userEntity.setEmail(email);
-        userEntity.setPassword(password);
-        return userEntity;
-    }
+  /**
+   * Creates UserEntity database Object.
+   *
+   * @param email user's email
+   * @param password user's password
+   * @return created UserEntity object for test/mocks
+   */
+  private UserEntity createUserEntity(String email, String password) {
+    UserEntity userEntity = new UserEntity();
+    userEntity.setUserId(1L);
+    userEntity.setEmail(email);
+    userEntity.setPassword(password);
+    return userEntity;
+  }
 
-    @Test
-    void registerInvalidUserEmailAddressWith406() throws Exception {
-        // Given
-        String email = "registerInvalidUserEmailAddressWith406";
-        String password = "password";
-        RegisterRequest registerRequest = this.createRegisterRequest(email, password);
+  @Test
+  void registerInvalidUserEmailAddressWith406() throws Exception {
+    // Given
+    String email = "registerInvalidUserEmailAddressWith406";
+    String password = "password";
+    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
-        // When
-        Mockito.when(this.userAuthorizationService.register(email, password))
-                .thenThrow(InvalidEmailException.class);
+    // When
+    Mockito.when(this.userAuthorizationService.register(email, password))
+        .thenThrow(InvalidEmailException.class);
 
-        // When & then
-        mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
-                        .content(this.mapFromJson(registerRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotAcceptable());
+    // When & then
+    mockMvc
+        .perform(
+            post(BASE_AUTHORIZATION_URL + REGISTER_URL)
+                .content(this.mapFromJson(registerRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isNotAcceptable());
+  }
 
-    }
+  @Test
+  void registerWithInvalidPasswordWith406() throws Exception {
+    // Given
+    String email = "registerWithInvalidPassword@test.com";
+    String password = "";
+    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
-    @Test
-    void registerWithInvalidPasswordWith406() throws Exception {
-        // Given
-        String email = "registerWithInvalidPassword@test.com";
-        String password = "";
-        RegisterRequest registerRequest = this.createRegisterRequest(email, password);
+    // When
+    Mockito.when(this.userAuthorizationService.register(email, password))
+        .thenThrow(InvalidPasswordException.class);
 
-        // When
-        Mockito.when(this.userAuthorizationService.register(email, password))
-                .thenThrow(InvalidPasswordException.class);
+    // When & then
+    mockMvc
+        .perform(
+            post(BASE_AUTHORIZATION_URL + REGISTER_URL)
+                .content(this.mapFromJson(registerRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isNotAcceptable());
+  }
 
-        // When & then
-        mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
-                        .content(this.mapFromJson(registerRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotAcceptable());
-    }
+  @Test
+  void registerUserWithUserRoleMissingWith404() throws Exception {
+    String email = "registerUserWithUserRoleMissing@test.com";
+    String password = "password";
+    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
-    @Test
-    void registerUserWithUserRoleMissingWith404() throws Exception {
-        String email = "registerUserWithUserRoleMissing@test.com";
-        String password = "password";
-        RegisterRequest registerRequest = this.createRegisterRequest(email, password);
+    // When
+    Mockito.when(this.userAuthorizationService.register(email, password))
+        .thenThrow(AuthorizationRoleMissingException.class);
 
-        // When
-        Mockito.when(this.userAuthorizationService.register(email, password))
-                .thenThrow(AuthorizationRoleMissingException.class);
+    // When Then
+    mockMvc
+        .perform(
+            post(BASE_AUTHORIZATION_URL + REGISTER_URL)
+                .content(this.mapFromJson(registerRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isNotFound());
+  }
 
-        // When Then
-        mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
-                        .content(this.mapFromJson(registerRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
+  @Test
+  void registerExistingUserValidEmailAddressWith409() throws Exception {
+    // Given
+    String email = "registerExistingUserValidEmailAddress@test.com";
+    String password = "password";
+    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
 
-    @Test
-    void registerExistingUserValidEmailAddressWith409() throws Exception {
-        // Given
-        String email = "registerExistingUserValidEmailAddress@test.com";
-        String password = "password";
-        RegisterRequest registerRequest = this.createRegisterRequest(email, password);
+    // When
+    Mockito.when(this.userAuthorizationService.register(email, password))
+        .thenThrow(EmailAlreadyExistsException.class);
 
-        // When
-        Mockito.when(this.userAuthorizationService.register(email, password))
-                .thenThrow(EmailAlreadyExistsException.class);
+    // Then
+    mockMvc
+        .perform(
+            post(BASE_AUTHORIZATION_URL + REGISTER_URL)
+                .content(this.mapFromJson(registerRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isConflict());
+  }
 
-        // Then
-        mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
-                        .content(this.mapFromJson(registerRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isConflict());
-    }
+  @Test
+  void successfulRegisterWith201() throws Exception {
+    String email = "successfulRegister@test.com";
+    String password = "password";
+    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
+    UserEntity userEntity = this.createUserEntity(email, password);
 
-    @Test
-    void successfulRegisterWith201() throws Exception {
-        String email = "successfulRegister@test.com";
-        String password = "password";
-        RegisterRequest registerRequest = this.createRegisterRequest(email, password);
-        UserEntity userEntity = this.createUserEntity(email, password);
+    // When
+    Mockito.when(this.userAuthorizationService.register(email, password)).thenReturn(userEntity);
 
-        // When
-        Mockito.when(this.userAuthorizationService.register(email, password))
-                .thenReturn(userEntity);
+    // When Then
+    mockMvc
+        .perform(
+            post(BASE_AUTHORIZATION_URL + REGISTER_URL)
+                .content(this.mapFromJson(registerRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isCreated());
+  }
 
-        // When Then
-        mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
-                        .content(this.mapFromJson(registerRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
-    }
+  @Test
+  void unsuccessfulLoginInvalidEmail() throws Exception {
+    String email = "dne@test.com";
+    String password = "validPass";
+    LoginRequest loginRequest = this.createLoginRequest(email, password);
+    AuthorizationResponse emptyAuthorizationResponse = new AuthorizationResponse();
 
-    @Test
-    void unsuccessfulLoginInvalidEmail() throws Exception {
-        String email = "dne@test.com";
-        String password = "validPass";
-        LoginRequest loginRequest = this.createLoginRequest(email, password);
-        AuthorizationResponse emptyAuthorizationResponse = new AuthorizationResponse();
+    Mockito.when(this.userAuthorizationService.login(email, password))
+        .thenReturn(emptyAuthorizationResponse)
+        .thenThrow(UsernameNotFoundException.class);
 
-        Mockito.when(this.userAuthorizationService.login(email, password))
-                .thenReturn(emptyAuthorizationResponse)
-                .thenThrow(UsernameNotFoundException.class);
+    mockMvc
+        .perform(
+            post(BASE_AUTHORIZATION_URL + LOGIN_URL)
+                .content(this.mapFromJson(loginRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isNotFound());
+  }
 
-        mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
-                        .content(this.mapFromJson(loginRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
+  @Test
+  void unsuccessfulLoginInvalidPassword() throws Exception {
+    String email = "unsuccessfulLoginInvalidPassword@test.com";
+    String password = "invalidPass";
+    AuthorizationResponse emptyAuthorizationResponse = new AuthorizationResponse();
+    LoginRequest loginRequest = this.createLoginRequest(email, password);
 
-    @Test
-    void unsuccessfulLoginInvalidPassword() throws Exception {
-        String email = "unsuccessfulLoginInvalidPassword@test.com";
-        String password = "invalidPass";
-        AuthorizationResponse emptyAuthorizationResponse = new AuthorizationResponse();
-        LoginRequest loginRequest = this.createLoginRequest(email, password);
+    Mockito.when(this.userAuthorizationService.login(email, password))
+        .thenReturn(emptyAuthorizationResponse)
+        .thenThrow(RuntimeException.class);
 
-        Mockito.when(this.userAuthorizationService.login(email, password))
-                .thenReturn(emptyAuthorizationResponse)
-                .thenThrow(RuntimeException.class);
+    mockMvc
+        .perform(
+            post(BASE_AUTHORIZATION_URL + LOGIN_URL)
+                .content(this.mapFromJson(loginRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+  }
 
-        mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
-                        .content(this.mapFromJson(loginRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-    }
+  @Test
+  void successfulLogin() throws Exception {
+    String email = "successfulLogin@test.com";
+    String password = "password";
+    LoginRequest loginRequest = this.createLoginRequest(email, password);
+    AuthorizationResponse authorizationResponse = new AuthorizationResponse();
+    authorizationResponse.setAccessToken("ValidToken");
 
-    @Test
-    void successfulLogin() throws Exception {
-        String email = "successfulLogin@test.com";
-        String password = "password";
-        LoginRequest loginRequest = this.createLoginRequest(email, password);
-        AuthorizationResponse authorizationResponse = new AuthorizationResponse();
-        authorizationResponse.setAccessToken("ValidToken");
+    Mockito.when(this.userAuthorizationService.login(email, password))
+        .thenReturn(authorizationResponse);
 
-        Mockito.when(this.userAuthorizationService.login(email, password))
-                .thenReturn(authorizationResponse);
-
-        mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
-                        .content(this.mapFromJson(loginRequest))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-    }
-
+    mockMvc
+        .perform(
+            post(BASE_AUTHORIZATION_URL + LOGIN_URL)
+                .content(this.mapFromJson(loginRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isOk());
+  }
 }

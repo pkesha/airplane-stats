@@ -35,100 +35,90 @@ import org.springframework.web.context.WebApplicationContext;
 @AutoConfigureWebMvc
 @SpringBootTest(classes = JwtAuthenticationFilter.class)
 class JwtAuthenticationFilterTest {
-    private final HttpServletResponse response = new MockHttpServletResponse();
-    @Spy
-    private final HttpServletRequest request = new MockHttpServletRequest();
-    @Spy
-    private final FilterChain filterChain = new MockFilterChain();
-    @Autowired
-    MockMvc mockMvc;
-    @Autowired
-    WebApplicationContext webApplicationContext;
-    @MockBean
-    JwtGenerator jwtGenerator;
-    @MockBean
-    UserDetailsServiceImpl userDetailsService;
-    @InjectMocks
-    JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final HttpServletResponse response = new MockHttpServletResponse();
+  @Spy private final HttpServletRequest request = new MockHttpServletRequest();
+  @Spy private final FilterChain filterChain = new MockFilterChain();
+  @Autowired MockMvc mockMvc;
+  @Autowired WebApplicationContext webApplicationContext;
+  @MockBean JwtGenerator jwtGenerator;
+  @MockBean UserDetailsServiceImpl userDetailsService;
+  @InjectMocks JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @BeforeEach
-    public void setUp() {
-        this.response.setHeader(JwtSecurityConstants.AUTHORIZATION_HEADER, JwtSecurityConstants.TOKEN_PREFIX + " Test");
-    }
+  @BeforeEach
+  public void setUp() {
+    this.response.setHeader(
+        JwtSecurityConstants.AUTHORIZATION_HEADER, JwtSecurityConstants.TOKEN_PREFIX + " Test");
+  }
 
-    @Test
-    void doFilterInternalServletException() throws ServletException, IOException {
-        String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
-        String email = "validEmailDoFilterInternalServletException@test.com";
-        String password = "password";
-        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
-        grantedAuthorities.add(grantedAuthority);
+  @Test
+  void doFilterInternalServletException() throws ServletException, IOException {
+    String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
+    String email = "validEmailDoFilterInternalServletException@test.com";
+    String password = "password";
+    Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+    GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
+    grantedAuthorities.add(grantedAuthority);
 
-        UserDetails userDetails = new User(email, password, grantedAuthorities);
+    UserDetails userDetails = new User(email, password, grantedAuthorities);
 
-        Mockito.when(this.jwtGenerator.getEmailFromJwt(token))
-                .thenReturn(email);
+    Mockito.when(this.jwtGenerator.getEmailFromJwt(token)).thenReturn(email);
 
-        Mockito.when(this.userDetailsService.loadUserByUsername(email))
-                .thenReturn(userDetails);
+    Mockito.when(this.userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
 
-        Mockito.doThrow(new ServletException())
-                .when(this.filterChain)
-                .doFilter(this.request, this.response);
+    Mockito.doThrow(new ServletException())
+        .when(this.filterChain)
+        .doFilter(this.request, this.response);
 
-        assertThrows(ServletException.class, () ->
-                this.jwtAuthenticationFilter.doFilterInternal(this.request, this.response, this.filterChain));
+    assertThrows(
+        ServletException.class,
+        () ->
+            this.jwtAuthenticationFilter.doFilterInternal(
+                this.request, this.response, this.filterChain));
+  }
 
-    }
+  @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
+  @Test
+  void doFilterInternalIOException() throws ServletException, IOException {
+    String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
+    String email = "validEmailDoFilterInternalIOException@test.com";
+    String password = "password";
+    Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+    GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
+    grantedAuthorities.add(grantedAuthority);
 
-    @Test
-    void doFilterInternalIOException() throws ServletException, IOException {
-        String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
-        String email = "validEmailDoFilterInternalIOException@test.com";
-        String password = "password";
-        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
-        grantedAuthorities.add(grantedAuthority);
+    UserDetails userDetails = new User(email, password, grantedAuthorities);
 
-        UserDetails userDetails = new User(email, password, grantedAuthorities);
+    Mockito.when(this.jwtGenerator.getEmailFromJwt(token)).thenReturn(email);
 
-        Mockito.when(this.jwtGenerator.getEmailFromJwt(token))
-                .thenReturn(email);
+    Mockito.when(this.userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
 
-        Mockito.when(this.userDetailsService.loadUserByUsername(email))
-                .thenReturn(userDetails);
+    Mockito.doThrow(new IOException()).when(this.filterChain).doFilter(this.request, this.response);
 
-        Mockito.doThrow(new IOException())
-                .when(this.filterChain)
-                .doFilter(this.request, this.response);
+    assertThrows(
+        IOException.class,
+        () ->
+            this.jwtAuthenticationFilter.doFilterInternal(
+                this.request, this.response, this.filterChain));
+  }
 
-        assertThrows(IOException.class, () ->
-                this.jwtAuthenticationFilter.doFilterInternal(this.request, this.response, this.filterChain));
+  @Test
+  void doFilterInternalSuccess() {
+    String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
+    String email = "validEmailDoFilterInternalIOException@test.com";
+    String password = "password";
+    Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+    GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
+    grantedAuthorities.add(grantedAuthority);
 
-    }
+    UserDetails userDetails = new User(email, password, grantedAuthorities);
 
-    @Test
-    void doFilterInternalSuccess() {
-        String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
-        String email = "validEmailDoFilterInternalIOException@test.com";
-        String password = "password";
-        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
-        grantedAuthorities.add(grantedAuthority);
+    Mockito.when(this.jwtGenerator.getEmailFromJwt(token)).thenReturn(email);
 
-        UserDetails userDetails = new User(email, password, grantedAuthorities);
+    Mockito.when(this.userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
 
-        Mockito.when(this.jwtGenerator.getEmailFromJwt(token))
-                .thenReturn(email);
-
-        Mockito.when(this.userDetailsService.loadUserByUsername(email))
-                .thenReturn(userDetails);
-
-        assertDoesNotThrow(() ->
-                this.jwtAuthenticationFilter.doFilterInternal(this.request, this.response, this.filterChain));
-
-    }
-
-
+    assertDoesNotThrow(
+        () ->
+            this.jwtAuthenticationFilter.doFilterInternal(
+                this.request, this.response, this.filterChain));
+  }
 }

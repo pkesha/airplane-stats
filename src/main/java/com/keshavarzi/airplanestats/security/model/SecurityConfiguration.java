@@ -19,68 +19,77 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configure & enable security settings for SpringBoot service.
+ */
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 public class SecurityConfiguration {
-    private static final String AUTHORIZED_URL = "/api/authorization/**";
-    private JwtAuthenticationEntryPoint authenticationEntryPoint;
+  private static final String AUTHORIZED_URL = "/api/authorization/**";
+  private JwtAuthenticationEntryPoint authenticationEntryPoint;
 
-    /**
-     * <p> Security filter for endpoints, certain endpoints require certain users</p>
-     * <p> Disable CSRF if it's being used as a backend application</p>
-     * <p> Enable CSRF if project is being used with front end package</p>
-     *
-     * @param http with SecurityFilterChain
-     * @return url with security filter chain and headers
-     * @throws Exception if things go wrong
-     */
-    @Bean
-    public SecurityFilterChain securityFilterChain(@NonNull final HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .exceptionHandling((exceptionHandlingConfigurer) -> exceptionHandlingConfigurer
-                        .authenticationEntryPoint(this.authenticationEntryPoint))
-                .sessionManagement((securitySessionManagementConfigurer) -> securitySessionManagementConfigurer
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers(AUTHORIZED_URL)
-                        .permitAll()
-                        .anyRequest()
-                        .permitAll())
-                .httpBasic(Customizer.withDefaults());
-        http.addFilterBefore(this.jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
+  /**
+   * Security filter for endpoints, certain endpoints require certain users.
+   *
+   * <p>Disable CSRF if it's being used as a backend application
+   *
+   * <p>Enable CSRF if project is being used with front end package
+   *
+   * @param http with SecurityFilterChain
+   * @return url with security filter chain and headers
+   * @throws Exception if things go wrong
+   */
+  @Bean
+  public SecurityFilterChain securityFilterChain(@NonNull final HttpSecurity http)
+      throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+        .exceptionHandling(
+            (exceptionHandlingConfigurer) ->
+                exceptionHandlingConfigurer.authenticationEntryPoint(this.authenticationEntryPoint))
+        .sessionManagement(
+            (securitySessionManagementConfigurer) ->
+                securitySessionManagementConfigurer.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
+            (authorize) ->
+                authorize.requestMatchers(AUTHORIZED_URL).permitAll().anyRequest().permitAll())
+        .httpBasic(Customizer.withDefaults());
+    http.addFilterBefore(
+        this.jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    return http.build();
+  }
 
-    /**
-     * @return JwtAuthentication Filter to
-     */
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter();
-    }
+  /**
+   * Returns bean of the JWTAuthentication filter.
+   *
+   * @return JwtAuthenticationFilter bean of the JWTAuthentication filter
+   */
+  @Bean
+  public JwtAuthenticationFilter jwtAuthenticationFilter() {
+    return new JwtAuthenticationFilter();
+  }
 
-    /**
-     * Will create the authentication manager bean
-     *
-     * @param authenticationConfiguration Authentication Configuration object to make into a bean
-     * @return AuthenticationManager bean
-     * @throws Exception throws exception if things don't work??
-     */
-    @Bean
-    public AuthenticationManager authenticationManager(
-            @NonNull final AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+  /**
+   * Will create the authentication manager bean.
+   *
+   * @param authenticationConfiguration Authentication Configuration object to make into a bean
+   * @return AuthenticationManager bean
+   * @throws Exception throws exception if things don't work??
+   */
+  @Bean
+  public AuthenticationManager authenticationManager(
+      @NonNull final AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    return authenticationConfiguration.getAuthenticationManager();
+  }
 
-    /**
-     * <p>Create password encoder bean</p>
-     *
-     * @return PasswordEncoder bean
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  /**
+   * Create password encoder bean.
+   *
+   * @return PasswordEncoder bean
+   */
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 }

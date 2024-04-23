@@ -16,67 +16,66 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Add implementation to filter JWT tokens
- */
+/** Add implementation to filter JWT tokens. */
 public final class JwtAuthenticationFilter extends OncePerRequestFilter {
-    @Autowired
-    private JwtGenerator jwtGenerator;
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+  @Autowired private JwtGenerator jwtGenerator;
+  @Autowired private UserDetailsServiceImpl userDetailsService;
 
+  /**
+   * Same contract as for {@code doFilter}, but guaranteed to be just invoked once per request
+   * within a single request thread. See {@link #shouldNotFilterAsyncDispatch()} for details.
+   *
+   * <p>Provides HttpServletRequest and HttpServletResponse arguments instead of the default
+   * ServletRequest and ServletResponse ones. This is a form of middleware. The request will be
+   * intercepted and will be filtered for correct credentials It sets the AuthenticationToken, if
+   * it's valid token, to the SecurityContext The token will be associated with email and retrieve
+   * the {@code UserDetails}
+   *
+   * @param request HTTP request to filter for correct credentials
+   * @param response HTTP with a response
+   * @param filterChain Passed in, will use method {@code doFilter}, to continue the filtering when
+   *     code is done
+   */
+  @Override
+  protected void doFilterInternal(
+      @Nonnull final HttpServletRequest request,
+      @Nonnull final HttpServletResponse response,
+      @Nonnull final FilterChain filterChain)
+      throws ServletException, IOException {
+    String token = this.getJwtFromRequest(request);
+    try {
+      assert token != null;
+      this.jwtGenerator.validateToken(token);
+      String email = this.jwtGenerator.getEmailFromJwt(token);
+      UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
 
-    /**
-     * Same contract as for {@code doFilter}, but guaranteed to be
-     * just invoked once per request within a single request thread.
-     * See {@link #shouldNotFilterAsyncDispatch()} for details.
-     * <p>Provides HttpServletRequest and HttpServletResponse arguments instead of the
-     * default ServletRequest and ServletResponse ones.
-     * This is a form of middleware.
-     * The request will be intercepted and will be filtered for correct credentials
-     * It sets the AuthenticationToken, if it's valid token, to the SecurityContext
-     * The token will be associated with email and retrieve the {@code UserDetails}
-     *
-     * @param request     HTTP request to filter for correct credentials
-     * @param response    HTTP with a response
-     * @param filterChain Passed in, will use method {@code doFilter}, to continue the filtering when code is done
-     */
-    @Override
-    protected void doFilterInternal(@Nonnull final HttpServletRequest request,
-                                    @Nonnull final HttpServletResponse response,
-                                    @Nonnull final FilterChain filterChain)
-            throws ServletException, IOException {
-        String token = this.getJwtFromRequest(request);
-        try {
-            this.jwtGenerator.validateToken(token);
-            String email = this.jwtGenerator.getEmailFromJwt(token);
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
+      UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+          new UsernamePasswordAuthenticationToken(userDetails, userDetails.getAuthorities());
+      usernamePasswordAuthenticationToken.setDetails(
+          new WebAuthenticationDetailsSource().buildDetails(request));
 
-            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                    new UsernamePasswordAuthenticationToken(userDetails, userDetails.getAuthorities());
-            usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource()
-                    .buildDetails(request));
-
-            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-        } catch (AuthenticationCredentialsNotFoundException authenticationCredentialsNotFoundException) {
-
-        }
-
-        filterChain.doFilter(request, response);
+      SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+    } catch (AuthenticationCredentialsNotFoundException
+        authenticationCredentialsNotFoundException) {
+      System.out.println(authenticationCredentialsNotFoundException.getMessage());
+    } finally {
+      filterChain.doFilter(request, response);
     }
+  }
 
-    /**
-     * Gets the JWT bearer token from the request
-     *
-     * @param request The request to check for bearer token
-     * @return Bearer token to check
-     */
-    private String getJwtFromRequest(final HttpServletRequest request) {
-        String bearerToken = request.getHeader(JwtSecurityConstants.AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtSecurityConstants.TOKEN_PREFIX)) {
-            return bearerToken.substring(7);
-        } else {
-            return null;
-        }
+  /**
+   * Gets the JWT bearer token from the request.
+   *
+   * @param request The request to check for bearer token
+   * @return Bearer token to check
+   */
+  private String getJwtFromRequest(final HttpServletRequest request) {
+    String bearerToken = request.getHeader(JwtSecurityConstants.AUTHORIZATION_HEADER);
+    if (StringUtils.hasText(bearerToken)
+        && bearerToken.startsWith(JwtSecurityConstants.TOKEN_PREFIX)) {
+      return bearerToken.substring(7);
+    } else {
+      return null;
     }
+  }
 }

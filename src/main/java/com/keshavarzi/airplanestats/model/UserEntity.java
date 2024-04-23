@@ -14,14 +14,16 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Collection;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Collection;
-import java.util.List;
-
+/**
+ * Creates an object based plane-stats.user_data.user table.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -107,7 +109,6 @@ public final class UserEntity implements Cloneable {
    * x.clone() != x</pre>
    *
    * </blockquote>
-   *
    * will be true, and that the expression:
    *
    * <blockquote>
@@ -116,7 +117,6 @@ public final class UserEntity implements Cloneable {
    * x.clone().getClass() == x.getClass()</pre>
    *
    * </blockquote>
-   *
    * will be {@code true}, but these are not absolute requirements. While it is typically the case
    * that:
    *
@@ -126,7 +126,6 @@ public final class UserEntity implements Cloneable {
    * x.clone().equals(x)</pre>
    *
    * </blockquote>
-   *
    * will be {@code true}, this is not an absolute requirement.
    *
    * <p>By convention, the returned object should be obtained by calling {@code super.clone}. If a
@@ -154,9 +153,10 @@ public final class UserEntity implements Cloneable {
    *     object and initializes all its fields with exactly the contents of the corresponding fields
    *     of this object, as if by assignment; the contents of the fields are not themselves cloned.
    *     Thus, this method performs a "shallow copy" of this object, not a "deep copy" operation.
+   *
    *     <p>The class {@code Object} does not itself implement the interface {@code Cloneable}, so
    *     calling the {@code clone} method on an object whose class is {@code Object} will result in
-   *     throwing an exception at run time.
+   *     throwing an exception at run time.</p>
    * @see Cloneable
    */
   @Override

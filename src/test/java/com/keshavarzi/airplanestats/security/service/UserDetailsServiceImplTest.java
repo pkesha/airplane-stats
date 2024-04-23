@@ -1,7 +1,10 @@
 package com.keshavarzi.airplanestats.security.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -15,10 +18,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @AutoConfigureWebMvc
 @AutoConfigureMockMvc

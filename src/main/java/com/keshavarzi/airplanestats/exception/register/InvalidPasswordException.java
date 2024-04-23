@@ -1,5 +1,8 @@
 package com.keshavarzi.airplanestats.exception.register;
 
+/**
+ * Custom Exception for invalid password/login attempt.
+ */
 public class InvalidPasswordException extends Exception {
 
   /**

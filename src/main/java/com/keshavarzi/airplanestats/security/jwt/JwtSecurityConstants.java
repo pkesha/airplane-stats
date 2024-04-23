@@ -1,9 +1,8 @@
 package com.keshavarzi.airplanestats.security.jwt;
 
 import io.jsonwebtoken.security.Keys;
-
-import javax.crypto.SecretKey;
 import java.nio.charset.Charset;
+import javax.crypto.SecretKey;
 
 class JwtSecurityConstants {
   public static final String AUTHORIZATION_HEADER = "Authorization";

@@ -1,6 +1,5 @@
 package com.keshavarzi.airplanestats.model;
 
-
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -20,6 +19,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Data object representing plane-stats.user_data.trip table.
+ */
 @Getter
 @Setter
 @ToString
@@ -27,33 +29,37 @@ import lombok.ToString;
 @Table(name = "trip", schema = "user_data")
 public final class Trip {
 
-    @Id
-    @Nonnull
-    @Column(name = "id", table = "trip", unique = true, nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long tripId;
+  @Id
+  @Nonnull
+  @Column(name = "id", table = "trip", unique = true, nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long tripId;
 
-    @Nonnull
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", table = "trip", nullable = false, unique = true,
-            foreignKey = @ForeignKey(name = "trip_user_id_fk"))
-    private UserEntity userEntity;
+  @Nonnull
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
+  @JoinColumn(
+      name = "user_id",
+      referencedColumnName = "id",
+      table = "trip",
+      nullable = false,
+      unique = true,
+      foreignKey = @ForeignKey(name = "trip_user_id_fk"))
+  private UserEntity userEntity;
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    @ToString.Exclude
-    @OneToMany(mappedBy = "trip", targetEntity = RouteEntity.class, orphanRemoval = true)
-    private Collection<RouteEntity> routeEntities;
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  @ToString.Exclude
+  @OneToMany(mappedBy = "trip", targetEntity = RouteEntity.class, orphanRemoval = true)
+  private Collection<RouteEntity> routeEntities;
 
-    @Column(name = "trip_name", table = "trip")
-    private String tripName;
+  @Column(name = "trip_name", table = "trip")
+  private String tripName;
 
-    @Column(name = "trip_start", table = "trip")
-    private ZonedDateTime tripStart;
+  @Column(name = "trip_start", table = "trip")
+  private ZonedDateTime tripStart;
 
-    @Column(name = "trip_end", table = "trip")
-    private ZonedDateTime tripEnd;
-
+  @Column(name = "trip_end", table = "trip")
+  private ZonedDateTime tripEnd;
 }

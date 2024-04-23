@@ -1,5 +1,8 @@
 package com.keshavarzi.airplanestats.exception.register;
 
+/**
+ * Custom Exception to indicate that email has already been registered.
+ */
 public class EmailAlreadyExistsException extends Exception {
 
   /**

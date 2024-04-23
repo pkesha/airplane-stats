@@ -1,6 +1,7 @@
 package com.keshavarzi.airplanestats.security.jwt;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,8 +19,6 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.IOException;
-
 @AutoConfigureWebMvc
 @SpringBootTest(classes = JwtAuthenticationEntryPoint.class)
 @TestComponent(value = "JwtAuthenticationEntryPointTest")
@@ -32,6 +31,7 @@ class JwtAuthenticationEntryPointTest {
   @MockBean DispatcherServletPath dispatcherServletPath;
   @InjectMocks JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
+  @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
   @Test
   void throwsIOException() throws IOException {
     Mockito.doThrow(new IOException())
