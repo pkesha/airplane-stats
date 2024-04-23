@@ -21,43 +21,53 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "route", schema = "user_data")
-public class RouteEntity {
+public final class RouteEntity {
 
-    @Id
-    @Nonnull
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", table = "route", unique = true, nullable = false)
-    private Long routeId;
+  @Id
+  @Nonnull
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", table = "route", unique = true, nullable = false)
+  private Long routeId;
 
-    // Returning a reference to a mutable object value stored in one of the object's fields exposes the internal representation of the object.
-    // If instances are accessed by untrusted code, and unchecked changes to the mutable object would compromise security or other important properties,
-    @Nonnull
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", table = "route", nullable = false, unique = true,
-            foreignKey = @ForeignKey(name = "route_user_id_fk"))
-    private UserEntity userEntity;
+  // Returning a reference to a mutable object value stored in one of the object's fields exposes
+  // the internal representation of the object.
+  // If instances are accessed by untrusted code, and unchecked changes to the mutable object would
+  // compromise security or other important properties,
+  @Nonnull
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
+  @JoinColumn(
+      name = "user_id",
+      referencedColumnName = "id",
+      table = "route",
+      nullable = false,
+      unique = true,
+      foreignKey = @ForeignKey(name = "route_user_id_fk"))
+  private UserEntity userEntity;
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    @ManyToOne(targetEntity = Trip.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "trip_id", referencedColumnName = "id", table = "route",
-            foreignKey = @ForeignKey(name = "route_trip_trip_id_fk"))
-    private Trip trip;
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.NONE)
+  @ManyToOne(targetEntity = Trip.class, cascade = CascadeType.ALL)
+  @JoinColumn(
+      name = "trip_id",
+      referencedColumnName = "id",
+      table = "route",
+      foreignKey = @ForeignKey(name = "route_trip_trip_id_fk"))
+  private Trip trip;
 
-    @Column(name = "flight_number", table = "route")
-    private String flightNumber;
+  @Column(name = "flight_number", table = "route")
+  private String flightNumber;
 
-    @Column(name = "origin", table = "route")
-    private String origin;
+  @Column(name = "origin", table = "route")
+  private String origin;
 
-    @Column(name = "destination", table = "route")
-    private String destination;
+  @Column(name = "destination", table = "route")
+  private String destination;
 
-    @Column(name = "airplane_model", table = "route")
-    private String airplaneModel;
+  @Column(name = "airplane_model", table = "route")
+  private String airplaneModel;
 
-    @Column(name = "airline", table = "route")
-    private String airline;
+  @Column(name = "airline", table = "route")
+  private String airline;
 }

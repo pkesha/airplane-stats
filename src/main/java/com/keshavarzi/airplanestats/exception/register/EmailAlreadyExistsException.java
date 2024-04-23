@@ -1,6 +1,7 @@
 package com.keshavarzi.airplanestats.exception.register;
 
-public class AuthorizationRoleMissingException extends Exception {
+public class EmailAlreadyExistsException extends Exception {
+
   /**
    * Constructs a new exception with the specified detail message. The cause is not initialized, and
    * may subsequently be initialized by a call to {@link #initCause}.
@@ -8,7 +9,7 @@ public class AuthorizationRoleMissingException extends Exception {
    * @param message the detail message. The detail message is saved for later retrieval by the
    *     {@link #getMessage()} method.
    */
-  public AuthorizationRoleMissingException(final String message) {
-    super("Security role was not found: " + message);
+  public EmailAlreadyExistsException(final String message) {
+    super("Email Exists: " + message);
   }
 }

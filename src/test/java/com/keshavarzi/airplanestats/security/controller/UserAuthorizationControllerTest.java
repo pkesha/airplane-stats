@@ -1,9 +1,11 @@
 package com.keshavarzi.airplanestats.security.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.keshavarzi.airplanestats.exception.register.AuthorizationRoleMissingException;
-import com.keshavarzi.airplanestats.exception.register.EmailExistException;
+import com.keshavarzi.airplanestats.exception.register.EmailAlreadyExistsException;
 import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.UserEntity;
@@ -27,8 +29,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @AutoConfigureWebMvc
 @AutoConfigureMockMvc
@@ -54,6 +54,7 @@ class UserAuthorizationControllerTest {
 
     /**
      * Helper function to parse object to JSON
+     *
      * @param object: any object to parse
      * @return object in JSON String
      * @throws JsonProcessingException: issue processing into JSON
@@ -66,7 +67,8 @@ class UserAuthorizationControllerTest {
 
     /**
      * Creates a RegisterRequest Object
-     * @param email: email of user
+     *
+     * @param email:    email of user
      * @param password: Password
      * @return created RegisterRequest object for test/mocks
      */
@@ -86,7 +88,8 @@ class UserAuthorizationControllerTest {
 
     /**
      * Creates UserEntity database Object
-     * @param email: user's email
+     *
+     * @param email:    user's email
      * @param password: user's password
      * @return created UserEntity object for test/mocks
      */
@@ -126,7 +129,7 @@ class UserAuthorizationControllerTest {
 
         // When
         Mockito.when(this.userAuthorizationService.register(email, password))
-                        .thenThrow(InvalidPasswordException.class);
+                .thenThrow(InvalidPasswordException.class);
 
         // When & then
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
@@ -143,7 +146,7 @@ class UserAuthorizationControllerTest {
 
         // When
         Mockito.when(this.userAuthorizationService.register(email, password))
-                        .thenThrow(AuthorizationRoleMissingException.class);
+                .thenThrow(AuthorizationRoleMissingException.class);
 
         // When Then
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
@@ -161,7 +164,7 @@ class UserAuthorizationControllerTest {
 
         // When
         Mockito.when(this.userAuthorizationService.register(email, password))
-                .thenThrow(EmailExistException.class);
+                .thenThrow(EmailAlreadyExistsException.class);
 
         // Then
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
@@ -179,7 +182,7 @@ class UserAuthorizationControllerTest {
 
         // When
         Mockito.when(this.userAuthorizationService.register(email, password))
-                        .thenReturn(userEntity);
+                .thenReturn(userEntity);
 
         // When Then
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + REGISTER_URL)
@@ -200,8 +203,8 @@ class UserAuthorizationControllerTest {
                 .thenThrow(UsernameNotFoundException.class);
 
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
-                .content(this.mapFromJson(loginRequest))
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(this.mapFromJson(loginRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
@@ -231,7 +234,7 @@ class UserAuthorizationControllerTest {
         authorizationResponse.setAccessToken("ValidToken");
 
         Mockito.when(this.userAuthorizationService.login(email, password))
-                        .thenReturn(authorizationResponse);
+                .thenReturn(authorizationResponse);
 
         mockMvc.perform(post(BASE_AUTHORIZATION_URL + LOGIN_URL)
                         .content(this.mapFromJson(loginRequest))

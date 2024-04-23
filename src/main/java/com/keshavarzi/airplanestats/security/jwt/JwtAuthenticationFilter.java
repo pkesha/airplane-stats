@@ -6,7 +6,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,10 +16,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-
-
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+/**
+ * Add implementation to filter JWT tokens
+ */
+public final class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtGenerator jwtGenerator;
     @Autowired
@@ -35,17 +37,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * It sets the AuthenticationToken, if it's valid token, to the SecurityContext
      * The token will be associated with email and retrieve the {@code UserDetails}
      *
-     * @param request HTTP request to filter for correct credentials
-     * @param response HTTP with a response
+     * @param request     HTTP request to filter for correct credentials
+     * @param response    HTTP with a response
      * @param filterChain Passed in, will use method {@code doFilter}, to continue the filtering when code is done
      */
     @Override
-    protected void doFilterInternal(@Nonnull HttpServletRequest request,
-                                    @Nonnull HttpServletResponse response,
-                                    @Nonnull FilterChain filterChain)
+    protected void doFilterInternal(@Nonnull final HttpServletRequest request,
+                                    @Nonnull final HttpServletResponse response,
+                                    @Nonnull final FilterChain filterChain)
             throws ServletException, IOException {
         String token = this.getJwtFromRequest(request);
-        if(StringUtils.hasText(token) && this.jwtGenerator.validateToken(token)) {
+        try {
+            this.jwtGenerator.validateToken(token);
             String email = this.jwtGenerator.getEmailFromJwt(token);
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
 
@@ -55,6 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        } catch (AuthenticationCredentialsNotFoundException authenticationCredentialsNotFoundException) {
+
         }
 
         filterChain.doFilter(request, response);
@@ -62,12 +67,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * Gets the JWT bearer token from the request
+     *
      * @param request The request to check for bearer token
      * @return Bearer token to check
      */
-    private String getJwtFromRequest(HttpServletRequest request) {
+    private String getJwtFromRequest(final HttpServletRequest request) {
         String bearerToken = request.getHeader(JwtSecurityConstants.AUTHORIZATION_HEADER);
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtSecurityConstants.TOKEN_PREFIX)) {
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtSecurityConstants.TOKEN_PREFIX)) {
             return bearerToken.substring(7);
         } else {
             return null;

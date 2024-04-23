@@ -3,15 +3,16 @@ POST http://localhost:8080/api/user/authorization/register
 Content-Type: application/json
 
 {
-  "email": "test3@test.com",
+  "email": "test4@test.com",
   "password": "password"
 }
 
 ### Login
-POST http://localhost:9092/api/user/authorization/login
+# @no-cookie-jar
+POST http://localhost:8080/api/user/authorization/login
 Content-Type: application/json
 
 {
-  "email": "test@test.com",
-  "password": "wrong"
+  "email": "test4@test.com",
+  "password": "password"
 }

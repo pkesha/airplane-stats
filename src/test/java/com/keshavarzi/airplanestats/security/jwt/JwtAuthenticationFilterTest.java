@@ -1,10 +1,16 @@
 package com.keshavarzi.airplanestats.security.jwt;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.keshavarzi.airplanestats.security.service.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -25,17 +31,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @AutoConfigureMockMvc
 @AutoConfigureWebMvc
 @SpringBootTest(classes = JwtAuthenticationFilter.class)
 class JwtAuthenticationFilterTest {
+    private final HttpServletResponse response = new MockHttpServletResponse();
+    @Spy
+    private final HttpServletRequest request = new MockHttpServletRequest();
+    @Spy
+    private final FilterChain filterChain = new MockFilterChain();
     @Autowired
     MockMvc mockMvc;
     @Autowired
@@ -46,12 +50,6 @@ class JwtAuthenticationFilterTest {
     UserDetailsServiceImpl userDetailsService;
     @InjectMocks
     JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @Spy
-    private HttpServletRequest request = new MockHttpServletRequest();
-    private final HttpServletResponse response = new MockHttpServletResponse();
-    @Spy
-    private FilterChain filterChain = new MockFilterChain();
 
     @BeforeEach
     public void setUp() {
@@ -131,7 +129,6 @@ class JwtAuthenticationFilterTest {
                 this.jwtAuthenticationFilter.doFilterInternal(this.request, this.response, this.filterChain));
 
     }
-
 
 
 }

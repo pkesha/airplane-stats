@@ -1,6 +1,12 @@
 package com.keshavarzi.airplanestats.security.jwt;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import io.jsonwebtoken.Jwts;
+import java.util.Date;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
@@ -15,13 +21,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @AutoConfigureMockMvc
 @AutoConfigureWebMvc
@@ -76,11 +75,11 @@ class JwtGeneratorTest {
         Authentication authentication1 = new TestingAuthenticationToken(email1, password1);
 
         Mockito.when(this.authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(email0, password0)))
+                        .authenticate(new UsernamePasswordAuthenticationToken(email0, password0)))
                 .thenReturn(authentication0);
 
         Mockito.when(this.authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(email1, password1)))
+                        .authenticate(new UsernamePasswordAuthenticationToken(email1, password1)))
                 .thenReturn(authentication1);
 
         assertNotEquals(authentication0, authentication1);
@@ -153,7 +152,6 @@ class JwtGeneratorTest {
         Mockito.when(this.authenticationManager
                         .authenticate(new UsernamePasswordAuthenticationToken(email, password)))
                 .thenReturn(authentication);
-
 
 
         assertThrows(Exception.class,

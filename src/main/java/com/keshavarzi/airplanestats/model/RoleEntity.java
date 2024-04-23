@@ -16,14 +16,14 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "role", schema = "user_data")
-public class RoleEntity {
-    @Id
-    @Nonnull
-    @Column(name = "id", table = "role", nullable = false, unique = true)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long roleId;
+public final class RoleEntity {
+  @Id
+  @Nonnull
+  @Column(name = "id", table = "role", nullable = false, unique = true)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long roleId;
 
-    @Nonnull
-    @Column(name = "role_name", table = "role", nullable = false)
-    private String roleName;
+  @Nonnull
+  @Column(name = "role_name", table = "role", nullable = false)
+  private String roleName;
 }

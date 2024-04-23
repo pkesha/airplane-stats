@@ -1,7 +1,10 @@
 package com.keshavarzi.airplanestats.security.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.keshavarzi.airplanestats.exception.register.AuthorizationRoleMissingException;
-import com.keshavarzi.airplanestats.exception.register.EmailExistException;
+import com.keshavarzi.airplanestats.exception.register.EmailAlreadyExistsException;
 import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.RoleEntity;
@@ -10,6 +13,7 @@ import com.keshavarzi.airplanestats.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
 import com.keshavarzi.airplanestats.security.jwt.JwtGenerator;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,11 +30,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @AutoConfigureWebMvc
 @AutoConfigureMockMvc
@@ -55,14 +54,14 @@ public class UserAuthorizationServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.userAuthorizationService =
-                new UserAuthorizationService(this.userEntityRepository, this.roleEntityRepository,
-                        this.authenticationManager, this.passwordEncoder, this.jwtGenerator);
+        this.userAuthorizationService = new UserAuthorizationService(this.authenticationManager,
+                this.userEntityRepository, this.roleEntityRepository, this.passwordEncoder, this.jwtGenerator);
     }
 
     /**
      * Creates UserEntity Object for testing
-     * @param email User email
+     *
+     * @param email    User email
      * @param password user password
      * @return UserEntity object
      */
@@ -93,7 +92,7 @@ public class UserAuthorizationServiceTest {
     }
 
     @Test
-    void registerWithInvalidPasswordLessThan8Characters(){
+    void registerWithInvalidPasswordLessThan8Characters() {
         String email = "registerWithInvalidPasswordLessThan8Characters@test.com";
         String password = "test";
 
@@ -102,7 +101,7 @@ public class UserAuthorizationServiceTest {
     }
 
     @Test
-    void registerWithInvalidPasswordMoreThan15Characters(){
+    void registerWithInvalidPasswordMoreThan15Characters() {
         String email = "registerWithInvalidPasswordMoreThan15Characters@test.com";
         String password = "registerWithInvalidPasswordMoreThan15Characters";
 
@@ -119,7 +118,7 @@ public class UserAuthorizationServiceTest {
         Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
                 .thenReturn(Optional.of(userEntity));
 
-        assertThrows(EmailExistException.class, () ->
+        assertThrows(EmailAlreadyExistsException.class, () ->
                 this.userAuthorizationService.register(email, password));
     }
 
@@ -138,7 +137,7 @@ public class UserAuthorizationServiceTest {
     }
 
     @Test
-    void successfulRegistration() throws EmailExistException, InvalidPasswordException, AuthorizationRoleMissingException, InvalidEmailException {
+    void successfulRegistration() throws EmailAlreadyExistsException, InvalidPasswordException, AuthorizationRoleMissingException, InvalidEmailException {
         String email = "successfulRegistration@test.com";
         String password = "validPassword";
 

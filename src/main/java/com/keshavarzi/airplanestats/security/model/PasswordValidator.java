@@ -1,14 +1,15 @@
 package com.keshavarzi.airplanestats.security.model;
 
-//Driver class
-//public final class PasswordValidator {
-//    private static final Pattern SPECIAL_CHARACTERS = Pattern.compile("[$&+,:;=\\\\?@#|/'<>.^*()%!-]");
+// Driver class
+// public final class PasswordValidator {
+//    private static final Pattern SPECIAL_CHARACTERS =
+// Pattern.compile("[$&+,:;=\\\\?@#|/'<>.^*()%!-]");
 //    private static final Pattern INTEGER_CHARACTERS = Pattern.compile("\"\\\\d+\";");
 //    private static final Pattern CAPITAL_CHARACTERS = Pattern.compile("(?=.*[A-Z])");
 //    private static final Pattern LOWERCASE_CHARACTERS = Pattern.compile("(?=.*[a-z])");
 
-    // A utility function to check
-    // whether a password is valid or not
+// A utility function to check
+// whether a password is valid or not
 
 //    public static void isValid(String password)
 //            throws InvalidPasswordException
@@ -27,6 +28,6 @@ package com.keshavarzi.airplanestats.security.model;
 //            throw new InvalidPasswordException(5);
 //        }
 //
-        // The password is valid
+// The password is valid
 //    }
-//}
+// }

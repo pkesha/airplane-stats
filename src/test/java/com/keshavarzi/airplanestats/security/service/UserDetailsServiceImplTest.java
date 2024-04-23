@@ -24,59 +24,28 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureMockMvc
 @SpringBootTest(classes = UserDetailsServiceImpl.class)
 class UserDetailsServiceImplTest {
-    @Autowired
-    MockMvc mockMvc;
-    @Autowired
-    WebApplicationContext webApplicationContext;
-    @MockBean
-    UserEntityRepository userEntityRepository;
-    @MockBean
-    PasswordEncoder passwordEncoder;
-    @MockBean
-    RoleEntityRepository roleEntityRepository;
-    @InjectMocks
-    UserDetailsServiceImpl userDetailsService;
+  @Autowired MockMvc mockMvc;
+  @Autowired WebApplicationContext webApplicationContext;
+  @MockBean UserEntityRepository userEntityRepository;
+  @MockBean PasswordEncoder passwordEncoder;
+  @MockBean RoleEntityRepository roleEntityRepository;
+  @InjectMocks UserDetailsServiceImpl userDetailsService;
 
-    @BeforeEach
-    void setUp() {
-        this.userDetailsService =
-                new UserDetailsServiceImpl(this.userEntityRepository);
-    }
+  @BeforeEach
+  void setUp() {
+    this.userDetailsService = new UserDetailsServiceImpl(this.userEntityRepository);
+  }
 
-    @Test
-    void loadUserByUsernameThatDoesNotExist() {
-        String email = "loadUserByUsernameThatDoesNotExist@test.com";
+  @Test
+  void loadUserByUsernameThatDoesNotExist() {
+    String email = "loadUserByUsernameThatDoesNotExist@test.com";
 
-        Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
-                .thenReturn(Optional.empty());
+    Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+        .thenReturn(Optional.empty());
 
-        assertThrows(UsernameNotFoundException.class,
-                () -> this.userDetailsService.loadUserByUsername(email));
-    }
+    assertThrows(
+        UsernameNotFoundException.class, () -> this.userDetailsService.loadUserByUsername(email));
+  }
 
-    //TODO: Successful Junit test - keep commented code but it returns an exception when it shouldn't
-    @Test
-    void successfulLoadOfUsernames() {
-//        String email = "successfulLoadOfUsernames@test.com";
-//
-//        UserEntity userEntity = new UserEntity();
-//        userEntity.setEmail(email);
-//        userEntity.setPassword("password");
-//
-//
-//        RoleEntity roleEntity = new RoleEntity();
-//        roleEntity.setRoleName("USER");
-//        userEntity.setRoleEntities(List.of(roleEntity));
-//
-//        Collection<GrantedAuthority> grantedAuthoritiesToUser = new ArrayList<>();
-//        grantedAuthoritiesToUser.add(new SimpleGrantedAuthority(roleEntity.getRoleName()));
-//
-//        Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
-//                .thenReturn(Optional.of(userEntity));
-//
-//        Mockito.when(this.userDetailsService.loadUserByUsername(email))
-//                .thenReturn(new User(userEntity.getEmail(), userEntity.getPassword(), null));
-//
-//        assertNotNull(this.userDetailsService.loadUserByUsername(email));
-    }
+  // TODO: Successful Junit test - keep commented code but it returns an exception when it shouldn't
 }

@@ -3,6 +3,7 @@ package com.keshavarzi.airplanestats.security.model;
 import com.keshavarzi.airplanestats.security.jwt.JwtAuthenticationEntryPoint;
 import com.keshavarzi.airplanestats.security.jwt.JwtAuthenticationFilter;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -30,12 +30,13 @@ public class SecurityConfiguration {
      * <p> Security filter for endpoints, certain endpoints require certain users</p>
      * <p> Disable CSRF if it's being used as a backend application</p>
      * <p> Enable CSRF if project is being used with front end package</p>
+     *
      * @param http with SecurityFilterChain
      * @return url with security filter chain and headers
      * @throws Exception if things go wrong
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(@NonNull final HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling((exceptionHandlingConfigurer) -> exceptionHandlingConfigurer
@@ -53,7 +54,6 @@ public class SecurityConfiguration {
     }
 
     /**
-     *
      * @return JwtAuthentication Filter to
      */
     @Bean
@@ -63,21 +63,23 @@ public class SecurityConfiguration {
 
     /**
      * Will create the authentication manager bean
+     *
      * @param authenticationConfiguration Authentication Configuration object to make into a bean
      * @return AuthenticationManager bean
      * @throws Exception throws exception if things don't work??
      */
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authenticationConfiguration) throws Exception {
+            @NonNull final AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
     /**
      * <p>Create password encoder bean</p>
+     *
      * @return PasswordEncoder bean
      */
-    @Bean(name = "PasswordEncoder")
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }

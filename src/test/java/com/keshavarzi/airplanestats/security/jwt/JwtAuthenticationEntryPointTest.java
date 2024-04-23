@@ -24,39 +24,36 @@ import java.io.IOException;
 @SpringBootTest(classes = JwtAuthenticationEntryPoint.class)
 @TestComponent(value = "JwtAuthenticationEntryPointTest")
 class JwtAuthenticationEntryPointTest {
-    @Autowired
-    WebApplicationContext webApplicationContext;
-    @MockBean
-    DispatcherServletPath dispatcherServletPath;
-    @InjectMocks
-    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+  private final AuthenticationException authException =
+      new AuthenticationServiceException("Random Implementation of AuthenticationException");
+  @Mock private final MockHttpServletRequest request = new MockHttpServletRequest();
+  @Mock private final MockHttpServletResponse response = new MockHttpServletResponse();
+  @Autowired WebApplicationContext webApplicationContext;
+  @MockBean DispatcherServletPath dispatcherServletPath;
+  @InjectMocks JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    private final AuthenticationException authException =
-            new AuthenticationServiceException("Random Implementation of AuthenticationException");
-    @Mock
-    private final MockHttpServletRequest request = new MockHttpServletRequest();
-    @Mock
-    private final MockHttpServletResponse response = new MockHttpServletResponse();
+  @Test
+  void throwsIOException() throws IOException {
+    Mockito.doThrow(new IOException())
+        .when(response)
+        .sendError(HttpServletResponse.SC_UNAUTHORIZED, this.authException.getMessage());
 
-    @Test
-    void throwsIOException() throws IOException {
-        Mockito.doThrow(new IOException())
-                .when(response)
-                .sendError(HttpServletResponse.SC_UNAUTHORIZED, this.authException.getMessage());
+    Assertions.assertThrows(
+        IOException.class,
+        () ->
+            this.jwtAuthenticationEntryPoint.commence(
+                this.request, this.response, this.authException));
+  }
 
-        Assertions.assertThrows(IOException.class, () ->
-                this.jwtAuthenticationEntryPoint.commence(this.request, this.response, this.authException));
+  @Test
+  void successful() throws IOException {
+    Mockito.doNothing()
+        .when(this.response)
+        .sendError(HttpServletResponse.SC_UNAUTHORIZED, this.authException.getMessage());
 
-    }
-
-    @Test
-    void successful() throws IOException {
-        Mockito.doNothing()
-                .when(this.response)
-                .sendError(HttpServletResponse.SC_UNAUTHORIZED, this.authException.getMessage());
-
-        Assertions.assertDoesNotThrow(() ->
-                this.jwtAuthenticationEntryPoint.commence(this.request, this.response, this.authException));
-    }
-
+    Assertions.assertDoesNotThrow(
+        () ->
+            this.jwtAuthenticationEntryPoint.commence(
+                this.request, this.response, this.authException));
+  }
 }

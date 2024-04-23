@@ -19,31 +19,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureWebMvc
 @AutoConfigureMockMvc
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = SecurityConfiguration.class)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+    classes = SecurityConfiguration.class)
 @ExtendWith(SpringExtension.class)
 class SecurityConfigurationTest {
-    @Autowired
-    private MockMvc mockMvc;
-    @MockBean
-    AuthenticationConfiguration authenticationConfiguration;
-    @MockBean
-    UserEntityRepository userEntityRepository;
-    @MockBean
-    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    @MockBean
-    JwtGenerator jwtGenerator;
+  @MockBean AuthenticationConfiguration authenticationConfiguration;
+  @MockBean UserEntityRepository userEntityRepository;
+  @MockBean JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+  @MockBean JwtGenerator jwtGenerator;
+  @Autowired private MockMvc mockMvc;
 
-    @Test
-    void givenIncorrectURL_Return404() throws Exception {
-        this.mockMvc.perform(get("/data/actuator/health/liveness"))
-                .andExpect(status().isNotFound());
-    }
-
-    //TODO: returnAuthenticationManager Junit test
-    @Test
-    void returnAuthenticationManager() {
-//        AuthenticationManager authenticationManager =
-//                new ProviderManager((AuthenticationProvider) authenticationConfiguration);
-//        notNull(this.securityConfiguration.authenticationManager(authenticationConfiguration));
-    }
+  @Test
+  void givenIncorrectURL_Return404() throws Exception {
+    this.mockMvc.perform(get("/data/actuator/health/liveness")).andExpect(status().isNotFound());
+  }
+  // TODO: returnAuthenticationManager Junit test
 }
