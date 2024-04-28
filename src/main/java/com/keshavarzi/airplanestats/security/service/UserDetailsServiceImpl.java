@@ -16,9 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-/**
- * {@code UserDetailService} custom implementation.
- */
+/** {@code UserDetailService} custom implementation. */
 @Service
 @AllArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -56,7 +54,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
    * @param roleEntities will send in list of roleEntities
    * @return List of Spring Security Roles
    */
-  private Collection<GrantedAuthority> mapRolesToAuthorities(
+  protected Collection<GrantedAuthority> mapRolesToAuthorities(
       final Collection<RoleEntity> roleEntities) {
     return roleEntities.stream()
         .map((roleEntity) -> new SimpleGrantedAuthority(roleEntity.getRoleName()))

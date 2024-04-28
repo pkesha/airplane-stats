@@ -8,9 +8,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
-/**
- * Commences and authentication scheme that sends a response error.
- */
+/** Commences and authentication scheme that sends a response error. */
 @Component
 public final class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
   /**

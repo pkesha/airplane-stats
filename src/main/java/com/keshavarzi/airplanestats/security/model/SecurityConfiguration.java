@@ -2,7 +2,9 @@ package com.keshavarzi.airplanestats.security.model;
 
 import com.keshavarzi.airplanestats.security.jwt.JwtAuthenticationEntryPoint;
 import com.keshavarzi.airplanestats.security.jwt.JwtAuthenticationFilter;
-import lombok.AllArgsConstructor;
+import com.keshavarzi.airplanestats.security.jwt.JwtUtility;
+import com.keshavarzi.airplanestats.security.service.UserDetailsServiceImpl;
+import jakarta.annotation.Nonnull;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,15 +21,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Configure & enable security settings for SpringBoot service.
- */
+/** Configure & enable security settings for SpringBoot service. */
 @Configuration
 @EnableWebSecurity
-@AllArgsConstructor(onConstructor = @__(@Autowired))
-public class SecurityConfiguration {
-  private static final String AUTHORIZED_URL = "/api/authorization/**";
-  private JwtAuthenticationEntryPoint authenticationEntryPoint;
+class SecurityConfiguration {
+  @Nonnull private static final String AUTHORIZED_URL = "/api/authorization/**";
+  @Nonnull private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+  @Nonnull private final JwtUtility jwtUtility;
+  @Nonnull private final UserDetailsServiceImpl userDetailsService;
+
+  @Autowired
+  public SecurityConfiguration(
+      @Nonnull final JwtAuthenticationEntryPoint authenticationEntryPoint,
+      @Nonnull final JwtUtility jwtUtility,
+      @Nonnull final UserDetailsServiceImpl userDetailsService) {
+    this.authenticationEntryPoint = authenticationEntryPoint;
+    this.jwtUtility = jwtUtility;
+    this.userDetailsService = userDetailsService;
+  }
 
   /**
    * Security filter for endpoints, certain endpoints require certain users.
@@ -67,7 +78,7 @@ public class SecurityConfiguration {
    */
   @Bean
   public JwtAuthenticationFilter jwtAuthenticationFilter() {
-    return new JwtAuthenticationFilter();
+    return new JwtAuthenticationFilter(this.jwtUtility, this.userDetailsService);
   }
 
   /**

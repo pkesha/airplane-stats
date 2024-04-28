@@ -8,11 +8,9 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-/**
- * Component of Spring, JWT Utils.
- */
+/** Component of Spring, JWT Utils. */
 @Component
-public class JwtGenerator {
+public class JwtUtility {
   /**
    * Generates a token.
    *
@@ -20,7 +18,7 @@ public class JwtGenerator {
    *     UsernamePasswordAuthenticationToken} is added to the manager
    * @return Token based current data, expiration data, email, and secret key object.
    */
-  public String generateToken(@NonNull final Authentication authentication) {
+  public final String generateToken(@NonNull final Authentication authentication) {
     String email = authentication.getName();
     Date currentDate = new Date();
     Date expireDate = new Date(currentDate.getTime() + JwtSecurityConstants.JWT_EXPIRATION);
@@ -56,7 +54,7 @@ public class JwtGenerator {
    *
    * @param token Checked for validation
    */
-  protected void validateToken(@NonNull final String token) {
+  protected final void validateToken(@NonNull final String token) {
     try {
       Jwts.parser().verifyWith(JwtSecurityConstants.SECRET_KEY).build().parseSignedClaims(token);
     } catch (Exception exception) {

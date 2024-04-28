@@ -4,19 +4,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.keshavarzi.airplanestats.exception.register.AuthorizationRoleMissingException;
-import com.keshavarzi.airplanestats.exception.register.EmailAlreadyExistsException;
-import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
-import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.UserEntity;
-import com.keshavarzi.airplanestats.model.request.LoginRequest;
-import com.keshavarzi.airplanestats.model.request.RegisterRequest;
-import com.keshavarzi.airplanestats.model.response.AuthorizationResponse;
+import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRoleMissingException;
+import com.keshavarzi.airplanestats.security.exception.register.EmailAlreadyExistsException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidEmailException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
+import com.keshavarzi.airplanestats.security.model.request.LoginRequest;
+import com.keshavarzi.airplanestats.security.model.request.RegisterRequest;
+import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.security.service.UserAuthorizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
@@ -44,7 +43,6 @@ class UserAuthorizationControllerTest {
 
   @BeforeEach
   void setUp() {
-    MockitoAnnotations.openMocks(this);
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
   }
 
@@ -199,10 +197,8 @@ class UserAuthorizationControllerTest {
     String email = "dne@test.com";
     String password = "validPass";
     LoginRequest loginRequest = this.createLoginRequest(email, password);
-    AuthorizationResponse emptyAuthorizationResponse = new AuthorizationResponse();
 
     Mockito.when(this.userAuthorizationService.login(email, password))
-        .thenReturn(emptyAuthorizationResponse)
         .thenThrow(UsernameNotFoundException.class);
 
     mockMvc
@@ -217,11 +213,9 @@ class UserAuthorizationControllerTest {
   void unsuccessfulLoginInvalidPassword() throws Exception {
     String email = "unsuccessfulLoginInvalidPassword@test.com";
     String password = "invalidPass";
-    AuthorizationResponse emptyAuthorizationResponse = new AuthorizationResponse();
     LoginRequest loginRequest = this.createLoginRequest(email, password);
 
     Mockito.when(this.userAuthorizationService.login(email, password))
-        .thenReturn(emptyAuthorizationResponse)
         .thenThrow(RuntimeException.class);
 
     mockMvc

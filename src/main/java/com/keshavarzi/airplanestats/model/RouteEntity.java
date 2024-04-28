@@ -16,16 +16,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Data object representing plane-stats.user_data.route table
- */
+/** Data object representing plane-stats.user_data.route table */
 @Getter
 @Setter
 @ToString
 @Entity
 @Table(name = "route", schema = "user_data")
 public final class RouteEntity {
-
   @Id
   @Nonnull
   @GeneratedValue(strategy = GenerationType.IDENTITY)

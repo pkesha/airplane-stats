@@ -1,18 +1,18 @@
 package com.keshavarzi.airplanestats.security.service;
 
-import com.keshavarzi.airplanestats.exception.register.AuthorizationRoleMissingException;
-import com.keshavarzi.airplanestats.exception.register.EmailAlreadyExistsException;
-import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
-import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.RoleEntity;
 import com.keshavarzi.airplanestats.model.UserEntity;
-import com.keshavarzi.airplanestats.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
-import com.keshavarzi.airplanestats.security.jwt.JwtGenerator;
+import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRoleMissingException;
+import com.keshavarzi.airplanestats.security.exception.register.EmailAlreadyExistsException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidEmailException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
+import com.keshavarzi.airplanestats.security.jwt.JwtUtility;
+import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
+import jakarta.annotation.Nonnull;
 import java.util.Collections;
 import java.util.regex.Pattern;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,20 +23,33 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-/**
- * Authorization logic is implemented in service.
- */
+/** Authorization logic is implemented in service. */
 @Service
-@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class UserAuthorizationService {
 
+  @Nonnull
   private static final Pattern VALID_EMAIL_ADDRESS =
       Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
-  private final AuthenticationManager authenticationManager;
-  private UserEntityRepository userEntityRepository;
-  private RoleEntityRepository roleEntityRepository;
-  private PasswordEncoder passwordEncoder;
-  private JwtGenerator jwtGenerator;
+
+  @Nonnull private final AuthenticationManager authenticationManager;
+  @Nonnull private final UserEntityRepository userEntityRepository;
+  @Nonnull private final RoleEntityRepository roleEntityRepository;
+  @Nonnull private final PasswordEncoder passwordEncoder;
+  @Nonnull private final JwtUtility jwtUtility;
+
+  @Autowired
+  protected UserAuthorizationService(
+      @Nonnull final AuthenticationManager authenticationManager,
+      @Nonnull final UserEntityRepository userEntityRepository,
+      @Nonnull final RoleEntityRepository roleEntityRepository,
+      @Nonnull final PasswordEncoder passwordEncoder,
+      @Nonnull final JwtUtility jwtUtility) {
+    this.authenticationManager = authenticationManager;
+    this.userEntityRepository = userEntityRepository;
+    this.roleEntityRepository = roleEntityRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.jwtUtility = jwtUtility;
+  }
 
   /**
    * Registers a new user if criteria are met.
@@ -50,12 +63,11 @@ public class UserAuthorizationService {
    * @throws AuthorizationRoleMissingException Authorization role does not exist in database
    *     (plane_stats.user_data.role)
    */
-  public UserEntity register(@NonNull final String userEmail, @NonNull final String password)
+  public final UserEntity register(@NonNull final String userEmail, @NonNull final String password)
       throws InvalidPasswordException,
           InvalidEmailException,
           EmailAlreadyExistsException,
           AuthorizationRoleMissingException {
-
     if (!VALID_EMAIL_ADDRESS.matcher(userEmail).matches()) {
       throw new InvalidEmailException(userEmail);
     } else if (!((password.length() >= 8) && (password.length() <= 15))) {
@@ -82,7 +94,8 @@ public class UserAuthorizationService {
    * @param password user password for login
    * @return @code{AuthorizationResponse} will encapsulate authorization response
    */
-  public AuthorizationResponse login(@NonNull final String email, @NonNull final String password) {
+  public final AuthorizationResponse login(
+      @NonNull final String email, @NonNull final String password) {
     if (this.userEntityRepository.findUserEntityByEmail(email).isEmpty()) {
       throw new UsernameNotFoundException(email + "not found");
     } else {
@@ -90,7 +103,7 @@ public class UserAuthorizationService {
           this.authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(email, password));
       SecurityContextHolder.getContext().setAuthentication(authentication);
-      String token = this.jwtGenerator.generateToken(authentication);
+      String token = this.jwtUtility.generateToken(authentication);
       AuthorizationResponse authorizationResponse = new AuthorizationResponse();
       authorizationResponse.setAccessToken(token);
       return authorizationResponse;

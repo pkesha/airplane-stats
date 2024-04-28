@@ -11,9 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Data object representing plane-stats.user_data.role table
- */
+/** Data object representing plane-stats.user_data.role table */
 @Getter
 @Setter
 @ToString

@@ -3,20 +3,19 @@ package com.keshavarzi.airplanestats.security.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.keshavarzi.airplanestats.exception.register.AuthorizationRoleMissingException;
-import com.keshavarzi.airplanestats.exception.register.EmailAlreadyExistsException;
-import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
-import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.model.RoleEntity;
 import com.keshavarzi.airplanestats.model.UserEntity;
-import com.keshavarzi.airplanestats.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
-import com.keshavarzi.airplanestats.security.jwt.JwtGenerator;
+import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRoleMissingException;
+import com.keshavarzi.airplanestats.security.exception.register.EmailAlreadyExistsException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidEmailException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
+import com.keshavarzi.airplanestats.security.jwt.JwtUtility;
+import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,9 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
-/**
- * Tests {@code UserAuthorizationService}.
- */
+/** Tests {@code UserAuthorizationService}. */
 @AutoConfigureWebMvc
 @AutoConfigureMockMvc
 @SpringBootTest(classes = UserAuthorizationService.class)
@@ -44,8 +41,8 @@ public class UserAuthorizationServiceTest {
   @MockBean RoleEntityRepository roleEntityRepository;
   @MockBean AuthenticationManager authenticationManager;
   @MockBean PasswordEncoder passwordEncoder;
-  @MockBean JwtGenerator jwtGenerator;
-  @InjectMocks UserAuthorizationService userAuthorizationService;
+  @MockBean JwtUtility jwtUtility;
+  @Autowired UserAuthorizationService userAuthorizationService;
 
   @BeforeEach
   void setUp() {
@@ -55,7 +52,7 @@ public class UserAuthorizationServiceTest {
             this.userEntityRepository,
             this.roleEntityRepository,
             this.passwordEncoder,
-            this.jwtGenerator);
+            this.jwtUtility);
   }
 
   /**
@@ -206,7 +203,7 @@ public class UserAuthorizationServiceTest {
         .thenReturn(Optional.of(userEntity));
     Mockito.when(this.authenticationManager.authenticate(authentication))
         .thenReturn(authentication);
-    Mockito.when(this.jwtGenerator.generateToken(authentication)).thenReturn(token);
+    Mockito.when(this.jwtUtility.generateToken(authentication)).thenReturn(token);
 
     AuthorizationResponse actualAuthorizationResponse =
         this.userAuthorizationService.login(email, password);

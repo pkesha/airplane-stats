@@ -1,10 +1,8 @@
-package com.keshavarzi.airplanestats.model.response;
+package com.keshavarzi.airplanestats.security.model.response;
 
 import lombok.Data;
 
-/**
- * Authorization Response DTO.
- */
+/** Authorization Response DTO. */
 @Data
 public final class AuthorizationResponse {
   private String accessToken;

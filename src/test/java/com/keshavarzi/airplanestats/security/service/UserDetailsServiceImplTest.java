@@ -7,7 +7,6 @@ import com.keshavarzi.airplanestats.repository.UserEntityRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,7 +27,7 @@ class UserDetailsServiceImplTest {
   @MockBean UserEntityRepository userEntityRepository;
   @MockBean PasswordEncoder passwordEncoder;
   @MockBean RoleEntityRepository roleEntityRepository;
-  @InjectMocks UserDetailsServiceImpl userDetailsService;
+  @Autowired UserDetailsServiceImpl userDetailsService;
 
   @BeforeEach
   void setUp() {

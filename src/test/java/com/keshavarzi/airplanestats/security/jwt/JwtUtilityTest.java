@@ -1,14 +1,13 @@
 package com.keshavarzi.airplanestats.security.jwt;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doNothing;
 
 import io.jsonwebtoken.Jwts;
 import java.util.Date;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,12 +23,12 @@ import org.springframework.web.context.WebApplicationContext;
 
 @AutoConfigureMockMvc
 @AutoConfigureWebMvc
-@SpringBootTest(classes = JwtGenerator.class)
-class JwtGeneratorTest {
+@SpringBootTest(classes = JwtUtility.class)
+class JwtUtilityTest {
   @Autowired MockMvc mockMvc;
   @Autowired WebApplicationContext webApplicationContext;
   @MockBean AuthenticationManager authenticationManager;
-  @InjectMocks JwtGenerator jwtGenerator;
+  @Autowired JwtUtility jwtUtility;
 
   private String generateToken(Authentication authentication) {
     String email = authentication.getName();
@@ -56,7 +55,7 @@ class JwtGeneratorTest {
         .thenReturn(authentication);
 
     String tokenExpected = this.generateToken(authentication);
-    String tokenActual = this.jwtGenerator.generateToken(authentication);
+    String tokenActual = this.jwtUtility.generateToken(authentication);
 
     assertEquals(tokenExpected, tokenActual);
   }
@@ -98,7 +97,7 @@ class JwtGeneratorTest {
 
     String tokenExpected = this.generateToken(authentication);
 
-    assertEquals(email, this.jwtGenerator.getEmailFromJwt(tokenExpected));
+    assertEquals(email, this.jwtUtility.getEmailFromJwt(tokenExpected));
   }
 
   @Test
@@ -125,24 +124,20 @@ class JwtGeneratorTest {
     String token0 = this.generateToken(authentication0);
     String token1 = this.generateToken(authentication1);
 
-    String tokenEmail0 = this.jwtGenerator.getEmailFromJwt(token0);
-    String tokenEmail1 = this.jwtGenerator.getEmailFromJwt(token1);
+    String tokenEmail0 = this.jwtUtility.getEmailFromJwt(token0);
+    String tokenEmail1 = this.jwtUtility.getEmailFromJwt(token1);
 
     assertNotEquals(tokenEmail0, tokenEmail1);
   }
 
   @Test
   void validatedTokenSuccess() {
-    String email = "validEmailValidatedToken@test.com";
-    String password = "validPass";
-    Authentication authentication = new TestingAuthenticationToken(email, password);
+    String email0 = "validatedTokenSuccess@test.com";
+    String password0 = "validPass0";
+    Authentication authentication0 = new TestingAuthenticationToken(email0, password0);
+    String token = this.generateToken(authentication0);
 
-    Mockito.when(this.authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(email, password)))
-        .thenReturn(authentication);
-
-    String token = this.generateToken(authentication);
-    doNothing().when(this.jwtGenerator).validateToken(token);
+    assertDoesNotThrow(() -> this.jwtUtility.validateToken(token));
   }
 
   @Test
@@ -157,6 +152,6 @@ class JwtGeneratorTest {
                 new UsernamePasswordAuthenticationToken(email, password)))
         .thenReturn(authentication);
 
-    assertThrows(Exception.class, () -> this.jwtGenerator.validateToken(token));
+    assertThrows(Exception.class, () -> this.jwtUtility.validateToken(token));
   }
 }

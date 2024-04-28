@@ -1,8 +1,8 @@
-package com.keshavarzi.airplanestats.exception.register;
+package com.keshavarzi.airplanestats.security.exception.register;
 
 /**
- * Custom exception if a role is missing from the db plane-stats.user_data.role.
- * Roles should be set before the application runs
+ * Custom exception if a role is missing from the db plane-stats.user_data.role. Roles should be set
+ * before the application runs
  */
 public class AuthorizationRoleMissingException extends Exception {
   /**

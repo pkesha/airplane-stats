@@ -1,8 +1,6 @@
-package com.keshavarzi.airplanestats.exception.register;
+package com.keshavarzi.airplanestats.security.exception.register;
 
-/**
- * Custom Exception that email is improperly formatted.
- */
+/** Custom Exception that email is improperly formatted. */
 public class InvalidEmailException extends Exception {
 
   /**

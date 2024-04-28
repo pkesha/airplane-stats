@@ -21,9 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Creates an object based plane-stats.user_data.user table.
- */
+/** Creates an object based plane-stats.user_data.user table. */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -109,7 +107,8 @@ public final class UserEntity implements Cloneable {
    * x.clone() != x</pre>
    *
    * </blockquote>
-   * will be true, and that the expression:
+   *
+   * <p>will be true, and that the expression:
    *
    * <blockquote>
    *
@@ -117,8 +116,9 @@ public final class UserEntity implements Cloneable {
    * x.clone().getClass() == x.getClass()</pre>
    *
    * </blockquote>
-   * will be {@code true}, but these are not absolute requirements. While it is typically the case
-   * that:
+   *
+   * <p>will be {@code true}, but these are not absolute requirements. While it is typically the
+   * case that:
    *
    * <blockquote>
    *
@@ -126,7 +126,8 @@ public final class UserEntity implements Cloneable {
    * x.clone().equals(x)</pre>
    *
    * </blockquote>
-   * will be {@code true}, this is not an absolute requirement.
+   *
+   * <p>will be {@code true}, this is not an absolute requirement.
    *
    * <p>By convention, the returned object should be obtained by calling {@code super.clone}. If a
    * class and all of its superclasses (except {@code Object}) obey this convention, it will be the
@@ -153,7 +154,6 @@ public final class UserEntity implements Cloneable {
    *     object and initializes all its fields with exactly the contents of the corresponding fields
    *     of this object, as if by assignment; the contents of the fields are not themselves cloned.
    *     Thus, this method performs a "shallow copy" of this object, not a "deep copy" operation.
-   *
    *     <p>The class {@code Object} does not itself implement the interface {@code Cloneable}, so
    *     calling the {@code clone} method on an object whose class is {@code Object} will result in
    *     throwing an exception at run time.</p>

@@ -18,8 +18,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /** Add implementation to filter JWT tokens. */
 public final class JwtAuthenticationFilter extends OncePerRequestFilter {
-  @Autowired private JwtGenerator jwtGenerator;
-  @Autowired private UserDetailsServiceImpl userDetailsService;
+  @Nonnull private final JwtUtility jwtUtility;
+  @Nonnull private final UserDetailsServiceImpl userDetailsService;
+
+  @Autowired
+  public JwtAuthenticationFilter(
+      @Nonnull final JwtUtility jwtUtility,
+      @Nonnull final UserDetailsServiceImpl userDetailsService) {
+    this.jwtUtility = jwtUtility;
+    this.userDetailsService = userDetailsService;
+  }
 
   /**
    * Same contract as for {@code doFilter}, but guaranteed to be just invoked once per request
@@ -45,8 +53,8 @@ public final class JwtAuthenticationFilter extends OncePerRequestFilter {
     String token = this.getJwtFromRequest(request);
     try {
       assert token != null;
-      this.jwtGenerator.validateToken(token);
-      String email = this.jwtGenerator.getEmailFromJwt(token);
+      this.jwtUtility.validateToken(token);
+      String email = this.jwtUtility.getEmailFromJwt(token);
       UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
 
       UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
@@ -55,8 +63,8 @@ public final class JwtAuthenticationFilter extends OncePerRequestFilter {
           new WebAuthenticationDetailsSource().buildDetails(request));
 
       SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-    } catch (AuthenticationCredentialsNotFoundException
-        authenticationCredentialsNotFoundException) {
+    } catch (
+    AuthenticationCredentialsNotFoundException authenticationCredentialsNotFoundException) {
       System.out.println(authenticationCredentialsNotFoundException.getMessage());
     } finally {
       filterChain.doFilter(request, response);

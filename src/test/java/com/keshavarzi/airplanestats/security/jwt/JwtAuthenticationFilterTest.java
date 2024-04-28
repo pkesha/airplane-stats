@@ -2,6 +2,8 @@ package com.keshavarzi.airplanestats.security.jwt;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 import com.keshavarzi.airplanestats.security.service.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
@@ -13,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +25,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @AutoConfigureMockMvc
@@ -40,14 +44,23 @@ class JwtAuthenticationFilterTest {
   @Spy private final FilterChain filterChain = new MockFilterChain();
   @Autowired MockMvc mockMvc;
   @Autowired WebApplicationContext webApplicationContext;
-  @MockBean JwtGenerator jwtGenerator;
   @MockBean UserDetailsServiceImpl userDetailsService;
-  @InjectMocks JwtAuthenticationFilter jwtAuthenticationFilter;
+  @MockBean JwtUtility jwtUtility;
+  @Autowired JwtAuthenticationFilter jwtAuthenticationFilter;
 
   @BeforeEach
   public void setUp() {
+    this.jwtAuthenticationFilter =
+        new JwtAuthenticationFilter(this.jwtUtility, this.userDetailsService);
+
     this.response.setHeader(
         JwtSecurityConstants.AUTHORIZATION_HEADER, JwtSecurityConstants.TOKEN_PREFIX + " Test");
+
+    this.mockMvc =
+        MockMvcBuilders.webAppContextSetup(this.webApplicationContext)
+            .apply(springSecurity())
+            .addFilter(this.jwtAuthenticationFilter)
+            .build();
   }
 
   @Test
@@ -61,7 +74,7 @@ class JwtAuthenticationFilterTest {
 
     UserDetails userDetails = new User(email, password, grantedAuthorities);
 
-    Mockito.when(this.jwtGenerator.getEmailFromJwt(token)).thenReturn(email);
+    Mockito.when(this.jwtUtility.getEmailFromJwt(token)).thenReturn(email);
 
     Mockito.when(this.userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
 
@@ -88,7 +101,7 @@ class JwtAuthenticationFilterTest {
 
     UserDetails userDetails = new User(email, password, grantedAuthorities);
 
-    Mockito.when(this.jwtGenerator.getEmailFromJwt(token)).thenReturn(email);
+    Mockito.when(this.jwtUtility.getEmailFromJwt(token)).thenReturn(email);
 
     Mockito.when(this.userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
 
@@ -103,16 +116,25 @@ class JwtAuthenticationFilterTest {
 
   @Test
   void doFilterInternalSuccess() {
-    String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
+    String token = JwtSecurityConstants.TOKEN_PREFIX + "test";
     String email = "validEmailDoFilterInternalIOException@test.com";
     String password = "password";
     Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
     GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
     grantedAuthorities.add(grantedAuthority);
+    UserDetails userDetails;
+    userDetails = new User(email, password, grantedAuthorities);
+    TestingAuthenticationToken testingAuthenticationToken =
+        new TestingAuthenticationToken(email, password);
 
-    UserDetails userDetails = new User(email, password, grantedAuthorities);
+    Mockito.when(this.request.getHeader(JwtSecurityConstants.AUTHORIZATION_HEADER))
+        .thenReturn(token);
 
-    Mockito.when(this.jwtGenerator.getEmailFromJwt(token)).thenReturn(email);
+    testingAuthenticationToken.setDetails(
+        new WebAuthenticationDetailsSource().buildDetails(this.request));
+
+    // TODO why not passing in token???
+    Mockito.when(this.jwtUtility.getEmailFromJwt(anyString())).thenReturn(email);
 
     Mockito.when(this.userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
 

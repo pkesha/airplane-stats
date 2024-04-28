@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ class JwtAuthenticationEntryPointTest {
   @Mock private final MockHttpServletResponse response = new MockHttpServletResponse();
   @Autowired WebApplicationContext webApplicationContext;
   @MockBean DispatcherServletPath dispatcherServletPath;
-  @InjectMocks JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+  @Autowired JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
   @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
   @Test

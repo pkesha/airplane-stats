@@ -1,10 +1,8 @@
-package com.keshavarzi.airplanestats.model.request;
+package com.keshavarzi.airplanestats.security.model.request;
 
 import lombok.Data;
 
-/**
- * DTO Request to register.
- */
+/** DTO Request to register. */
 @Data
 public final class RegisterRequest {
   private String email;

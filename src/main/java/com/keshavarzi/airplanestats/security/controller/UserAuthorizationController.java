@@ -1,14 +1,14 @@
 package com.keshavarzi.airplanestats.security.controller;
 
-import com.keshavarzi.airplanestats.exception.register.AuthorizationRoleMissingException;
-import com.keshavarzi.airplanestats.exception.register.EmailAlreadyExistsException;
-import com.keshavarzi.airplanestats.exception.register.InvalidEmailException;
-import com.keshavarzi.airplanestats.exception.register.InvalidPasswordException;
-import com.keshavarzi.airplanestats.model.request.LoginRequest;
-import com.keshavarzi.airplanestats.model.request.RegisterRequest;
-import com.keshavarzi.airplanestats.model.response.AuthorizationResponse;
+import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRoleMissingException;
+import com.keshavarzi.airplanestats.security.exception.register.EmailAlreadyExistsException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidEmailException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
+import com.keshavarzi.airplanestats.security.model.request.LoginRequest;
+import com.keshavarzi.airplanestats.security.model.request.RegisterRequest;
+import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.security.service.UserAuthorizationService;
-import lombok.AllArgsConstructor;
+import jakarta.annotation.Nonnull;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,15 +20,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Rest Controller to register, login and other authorizations.
- */
+/** Rest Controller to register, login and other authorizations. */
 @RestController
 @RequestMapping(path = "/api/user/authorization", name = "UserAuthorizationController")
-@AllArgsConstructor(onConstructor = @__(@Autowired))
-public final class UserAuthorizationController {
+final class UserAuthorizationController {
+  @Nonnull private final UserAuthorizationService userAuthorizationService;
 
-  private UserAuthorizationService userAuthorizationService;
+  @Autowired
+  public UserAuthorizationController(
+      @Nonnull final UserAuthorizationService userAuthorizationService) {
+    this.userAuthorizationService = userAuthorizationService;
+  }
 
   /**
    * Register a new user with email and password.
@@ -36,13 +38,10 @@ public final class UserAuthorizationController {
    * @param registerRequest DTO to create user
    * @return HttpStatus.NOT_ACCEPTABLE: Invalid username or password
    *     <p>{@code HttpStatus.CONFLICT}: Existing Email in database (plane_stats.user_data.user)</p>
-   *     <p>{@code HttpStatus.NOT_FOUND}: 'USER' Spring security role not present in database
-   *      (plane_stats.user_data.role).
-   *      Roles should exist in database at all time.</p>
-   *
-   *     <p>{@code HttpStatus.CREATED}:
-   *      User has been created with encoded password & stored in database
-   *      (plane_stats.user_data.user) as a 'USER' Spring security user</p>
+   *     <p>{@code HttpStatus.NOT_FOUND}: 'USER' Spring security role not present in database</p>
+   *     (plane_stats.user_data.role). Roles should exist in database at all time.
+   *     <p>{@code HttpStatus.CREATED}: User has been created with encoded password & stored in</p>
+   *     database (plane_stats.user_data.user) as a 'USER' Spring security user
    */
   @PostMapping(
       path = "register",
@@ -69,8 +68,8 @@ public final class UserAuthorizationController {
    * Login API. Will catch Exceptions for Unauthorized or unknown email login attempts.
    *
    * @param loginRequest DTO containing email and password
-   * @return Response entity encapsulating {@code AuthorizationResponse} DTO.
-   *       DTO informs of authorization results.
+   * @return Response entity encapsulating {@code AuthorizationResponse} DTO. DTO informs of
+   *     authorization results.
    */
   @PostMapping(
       path = "login",
