@@ -8,9 +8,9 @@ import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
 import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRoleMissingException;
-import com.keshavarzi.airplanestats.security.exception.register.EmailAlreadyExistsException;
-import com.keshavarzi.airplanestats.security.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidUsernameException;
+import com.keshavarzi.airplanestats.security.exception.register.UserAlreadyExistsException;
 import com.keshavarzi.airplanestats.security.jwt.JwtUtility;
 import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
 import java.util.Optional;
@@ -58,14 +58,14 @@ public class UserAuthorizationServiceTest {
   /**
    * Creates {@code UserEntity} for testing.
    *
-   * @param email User email
+   * @param username User username
    * @param password user password
    * @return UserEntity object
    */
-  private UserEntity createUserEntity(String email, String password) {
+  private UserEntity createUserEntity(String username, String password) {
     UserEntity userEntity = new UserEntity();
     userEntity.setUserId(1L);
-    userEntity.setEmail(email);
+    userEntity.setUsername(username);
     userEntity.setPassword(password);
 
     return userEntity;
@@ -79,75 +79,76 @@ public class UserAuthorizationServiceTest {
   }
 
   @Test
-  void registerWithInvalidEmailAddress() {
-    String email = "registerWithInvalidEmailAddress";
+  void registerWithInvalidUsername() {
+    String username = "registerWithInvalidUsername";
     String password = "password";
 
     assertThrows(
-        InvalidEmailException.class, () -> this.userAuthorizationService.register(email, password));
+        InvalidUsernameException.class,
+        () -> this.userAuthorizationService.register(username, password));
   }
 
   @Test
   void registerWithInvalidPasswordLessThan8Characters() {
-    String email = "registerWithInvalidPasswordLessThan8Characters@test.com";
+    String username = "registerWithInvalidPasswordLessThan8Characters@test.com";
     String password = "test";
 
     assertThrows(
         InvalidPasswordException.class,
-        () -> this.userAuthorizationService.register(email, password));
+        () -> this.userAuthorizationService.register(username, password));
   }
 
   @Test
   void registerWithInvalidPasswordMoreThan15Characters() {
-    String email = "registerWithInvalidPasswordMoreThan15Characters@test.com";
+    String username = "registerWithInvalidPasswordMoreThan15Characters@test.com";
     String password = "registerWithInvalidPasswordMoreThan15Characters";
 
     assertThrows(
         InvalidPasswordException.class,
-        () -> this.userAuthorizationService.register(email, password));
+        () -> this.userAuthorizationService.register(username, password));
   }
 
   @Test
-  void registerWithExistingEmail() {
-    String email = "validEmailTest@test.com";
+  void registerWithExistingUsername() {
+    String username = "validUsernameTest@test.com";
     String password = "validPassword";
-    UserEntity userEntity = this.createUserEntity(email, password);
+    UserEntity userEntity = this.createUserEntity(username, password);
 
-    Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+    Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.of(userEntity));
 
     assertThrows(
-        EmailAlreadyExistsException.class,
-        () -> this.userAuthorizationService.register(email, password));
+        UserAlreadyExistsException.class,
+        () -> this.userAuthorizationService.register(username, password));
   }
 
   @Test
   void registerWithMissingAuthorizationRole() {
-    String email = "validEmailTest@test.com";
+    String username = "validUsernameTest@test.com";
     String password = "validPassword";
 
-    Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+    Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.empty());
     Mockito.when(this.passwordEncoder.encode(password)).thenReturn("encodedPass");
 
     assertThrows(
         AuthorizationRoleMissingException.class,
-        () -> this.userAuthorizationService.register(email, password));
+        () -> this.userAuthorizationService.register(username, password));
   }
 
   @Test
   void successfulRegistration()
-      throws EmailAlreadyExistsException,
+      throws UserAlreadyExistsException,
           InvalidPasswordException,
           AuthorizationRoleMissingException,
-          InvalidEmailException {
-    String email = "successfulRegistration@test.com";
+          InvalidUsernameException {
+    String username = "successfulRegistration@test.com";
     String password = "validPassword";
 
-    UserEntity userEntity = this.createUserEntity(email, password);
+    UserEntity userEntity = this.createUserEntity(username, password);
     RoleEntity roleEntity = this.createUserRoleEntity();
 
-    Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+    Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.empty());
     Mockito.when(this.roleEntityRepository.findRoleEntityByRoleName("USER"))
         .thenReturn(Optional.of(roleEntity));
@@ -155,58 +156,58 @@ public class UserAuthorizationServiceTest {
     Mockito.when(this.userEntityRepository.save(Mockito.any(UserEntity.class)))
         .thenReturn(userEntity);
 
-    assertEquals(userEntity, this.userAuthorizationService.register(email, password));
+    assertEquals(userEntity, this.userAuthorizationService.register(username, password));
   }
 
   @Test
-  void loginFailedEmailNotFound() {
-    String email = "emailDoesNotExist@test.com";
+  void loginFailedUsernameNotFound() {
+    String username = "usernameDoesNotExist@test.com";
     String password = "validPass";
 
-    Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+    Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.empty());
 
     assertThrows(
         UsernameNotFoundException.class,
-        () -> this.userAuthorizationService.login(email, password));
+        () -> this.userAuthorizationService.login(username, password));
   }
 
   @Test
   void loginFailedAuthentication() {
-    String email = "loginFailedAuthentication@test.com";
+    String username = "loginFailedAuthentication@test.com";
     String password = "invalidPass";
 
-    UserEntity userEntity = this.createUserEntity(email, password);
+    UserEntity userEntity = this.createUserEntity(username, password);
     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-        new UsernamePasswordAuthenticationToken(email, password);
+        new UsernamePasswordAuthenticationToken(username, password);
 
-    Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+    Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.of(userEntity));
     Mockito.when(this.authenticationManager.authenticate(usernamePasswordAuthenticationToken))
         .thenThrow(new RuntimeException());
 
     assertThrows(
-        RuntimeException.class, () -> this.userAuthorizationService.login(email, password));
+        RuntimeException.class, () -> this.userAuthorizationService.login(username, password));
   }
 
   @Test
   void successfulLogin() {
-    String email = "loginFailedAuthentication@test.com";
+    String username = "loginFailedAuthentication@test.com";
     String password = "invalidPass";
     String token = "token";
-    UserEntity userEntity = this.createUserEntity(email, password);
-    TestingAuthenticationToken authentication = new TestingAuthenticationToken(email, password);
+    UserEntity userEntity = this.createUserEntity(username, password);
+    TestingAuthenticationToken authentication = new TestingAuthenticationToken(username, password);
     AuthorizationResponse expectedAuthorizationResponse = new AuthorizationResponse();
     expectedAuthorizationResponse.setAccessToken(token);
 
-    Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+    Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.of(userEntity));
     Mockito.when(this.authenticationManager.authenticate(authentication))
         .thenReturn(authentication);
     Mockito.when(this.jwtUtility.generateToken(authentication)).thenReturn(token);
 
     AuthorizationResponse actualAuthorizationResponse =
-        this.userAuthorizationService.login(email, password);
+        this.userAuthorizationService.login(username, password);
     assertEquals(expectedAuthorizationResponse, actualAuthorizationResponse);
   }
 }

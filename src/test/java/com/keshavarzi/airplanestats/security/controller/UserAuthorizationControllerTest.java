@@ -6,9 +6,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRoleMissingException;
-import com.keshavarzi.airplanestats.security.exception.register.EmailAlreadyExistsException;
-import com.keshavarzi.airplanestats.security.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidUsernameException;
+import com.keshavarzi.airplanestats.security.exception.register.UserAlreadyExistsException;
 import com.keshavarzi.airplanestats.security.model.request.LoginRequest;
 import com.keshavarzi.airplanestats.security.model.request.RegisterRequest;
 import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
@@ -61,20 +61,20 @@ class UserAuthorizationControllerTest {
   /**
    * Creates a RegisterRequest Object.
    *
-   * @param email email of user
+   * @param username username of user
    * @param password Password
    * @return created RegisterRequest object for test/mocks
    */
-  private RegisterRequest createRegisterRequest(String email, String password) {
+  private RegisterRequest createRegisterRequest(String username, String password) {
     RegisterRequest registerRequest = new RegisterRequest();
-    registerRequest.setEmail(email);
+    registerRequest.setUsername(username);
     registerRequest.setPassword(password);
     return registerRequest;
   }
 
-  private LoginRequest createLoginRequest(String email, String password) {
+  private LoginRequest createLoginRequest(String username, String password) {
     LoginRequest loginRequest = new LoginRequest();
-    loginRequest.setEmail(email);
+    loginRequest.setUsername(username);
     loginRequest.setPassword(password);
     return loginRequest;
   }
@@ -82,31 +82,31 @@ class UserAuthorizationControllerTest {
   /**
    * Creates UserEntity database Object.
    *
-   * @param email user's email
+   * @param username user's username
    * @param password user's password
    * @return created UserEntity object for test/mocks
    */
-  private UserEntity createUserEntity(String email, String password) {
+  private UserEntity createUserEntity(String username, String password) {
     UserEntity userEntity = new UserEntity();
     userEntity.setUserId(1L);
-    userEntity.setEmail(email);
+    userEntity.setUsername(username);
     userEntity.setPassword(password);
     return userEntity;
   }
 
   @Test
-  void registerInvalidUserEmailAddressWith406() throws Exception {
+  void register_invalidUserUsernameAddressValidPassword_406() throws Exception {
     // Given
-    String email = "registerInvalidUserEmailAddressWith406";
-    String password = "password";
-    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
+    String username = "registerInvalidUserUsernameAddressWith406";
+    String password = "validPass";
+    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
 
     // When
-    Mockito.when(this.userAuthorizationService.register(email, password))
-        .thenThrow(InvalidEmailException.class);
+    Mockito.when(this.userAuthorizationService.register(username, password))
+        .thenThrow(InvalidUsernameException.class);
 
     // When & then
-    mockMvc
+    this.mockMvc
         .perform(
             post(BASE_AUTHORIZATION_URL + REGISTER_URL)
                 .content(this.mapFromJson(registerRequest))
@@ -115,18 +115,18 @@ class UserAuthorizationControllerTest {
   }
 
   @Test
-  void registerWithInvalidPasswordWith406() throws Exception {
+  void register_withInvalidPasswordWithButValidUsername_406() throws Exception {
     // Given
-    String email = "registerWithInvalidPassword@test.com";
+    String username = "registerWithInvalidPasswordWithButValidUsername406@test.com";
     String password = "";
-    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
+    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
 
     // When
-    Mockito.when(this.userAuthorizationService.register(email, password))
+    Mockito.when(this.userAuthorizationService.register(username, password))
         .thenThrow(InvalidPasswordException.class);
 
     // When & then
-    mockMvc
+    this.mockMvc
         .perform(
             post(BASE_AUTHORIZATION_URL + REGISTER_URL)
                 .content(this.mapFromJson(registerRequest))
@@ -135,17 +135,17 @@ class UserAuthorizationControllerTest {
   }
 
   @Test
-  void registerUserWithUserRoleMissingWith404() throws Exception {
-    String email = "registerUserWithUserRoleMissing@test.com";
-    String password = "password";
-    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
+  void register_userWithValidUsernameRoleMissingValidPassword_404() throws Exception {
+    String username = "registerUserWithValidUsernameRoleMissingValidPasswordWith404@test.com";
+    String password = "validPass";
+    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
 
     // When
-    Mockito.when(this.userAuthorizationService.register(email, password))
+    Mockito.when(this.userAuthorizationService.register(username, password))
         .thenThrow(AuthorizationRoleMissingException.class);
 
     // When Then
-    mockMvc
+    this.mockMvc
         .perform(
             post(BASE_AUTHORIZATION_URL + REGISTER_URL)
                 .content(this.mapFromJson(registerRequest))
@@ -154,15 +154,15 @@ class UserAuthorizationControllerTest {
   }
 
   @Test
-  void registerExistingUserValidEmailAddressWith409() throws Exception {
+  void register_existingUserValidPassword_409() throws Exception {
     // Given
-    String email = "registerExistingUserValidEmailAddress@test.com";
-    String password = "password";
-    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
+    String username = "registerExistingUserValidPasswordWith409@test.com";
+    String password = "validPass";
+    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
 
     // When
-    Mockito.when(this.userAuthorizationService.register(email, password))
-        .thenThrow(EmailAlreadyExistsException.class);
+    Mockito.when(this.userAuthorizationService.register(username, password))
+        .thenThrow(UserAlreadyExistsException.class);
 
     // Then
     mockMvc
@@ -174,14 +174,14 @@ class UserAuthorizationControllerTest {
   }
 
   @Test
-  void successfulRegisterWith201() throws Exception {
-    String email = "successfulRegister@test.com";
+  void successfulRegister_201() throws Exception {
+    String username = "successfulRegister@test.com";
     String password = "password";
-    RegisterRequest registerRequest = this.createRegisterRequest(email, password);
-    UserEntity userEntity = this.createUserEntity(email, password);
+    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
+    UserEntity userEntity = this.createUserEntity(username, password);
 
     // When
-    Mockito.when(this.userAuthorizationService.register(email, password)).thenReturn(userEntity);
+    Mockito.when(this.userAuthorizationService.register(username, password)).thenReturn(userEntity);
 
     // When Then
     mockMvc
@@ -193,12 +193,12 @@ class UserAuthorizationControllerTest {
   }
 
   @Test
-  void unsuccessfulLoginInvalidEmail() throws Exception {
-    String email = "dne@test.com";
+  void unsuccessfulLogin_NonexistentUsernameValidPassword() throws Exception {
+    String username = "dne@test.com";
     String password = "validPass";
-    LoginRequest loginRequest = this.createLoginRequest(email, password);
+    LoginRequest loginRequest = this.createLoginRequest(username, password);
 
-    Mockito.when(this.userAuthorizationService.login(email, password))
+    Mockito.when(this.userAuthorizationService.login(username, password))
         .thenThrow(UsernameNotFoundException.class);
 
     mockMvc
@@ -210,12 +210,12 @@ class UserAuthorizationControllerTest {
   }
 
   @Test
-  void unsuccessfulLoginInvalidPassword() throws Exception {
-    String email = "unsuccessfulLoginInvalidPassword@test.com";
+  void unsuccessfulLogin_invalidValidUsernameValidPassword() throws Exception {
+    String username = "unsuccessfulLoginInvalidValidUsernamePassword@test.com";
     String password = "invalidPass";
-    LoginRequest loginRequest = this.createLoginRequest(email, password);
+    LoginRequest loginRequest = this.createLoginRequest(username, password);
 
-    Mockito.when(this.userAuthorizationService.login(email, password))
+    Mockito.when(this.userAuthorizationService.login(username, password))
         .thenThrow(RuntimeException.class);
 
     mockMvc
@@ -228,13 +228,13 @@ class UserAuthorizationControllerTest {
 
   @Test
   void successfulLogin() throws Exception {
-    String email = "successfulLogin@test.com";
+    String username = "successfulLogin@test.com";
     String password = "password";
-    LoginRequest loginRequest = this.createLoginRequest(email, password);
+    LoginRequest loginRequest = this.createLoginRequest(username, password);
     AuthorizationResponse authorizationResponse = new AuthorizationResponse();
     authorizationResponse.setAccessToken("ValidToken");
 
-    Mockito.when(this.userAuthorizationService.login(email, password))
+    Mockito.when(this.userAuthorizationService.login(username, password))
         .thenReturn(authorizationResponse);
 
     mockMvc

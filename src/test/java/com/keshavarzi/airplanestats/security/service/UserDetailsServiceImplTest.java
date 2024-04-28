@@ -36,13 +36,14 @@ class UserDetailsServiceImplTest {
 
   @Test
   void loadUserByUsernameThatDoesNotExist() {
-    String email = "loadUserByUsernameThatDoesNotExist@test.com";
+    String username = "loadUserByUsernameThatDoesNotExist@test.com";
 
-    Mockito.when(this.userEntityRepository.findUserEntityByEmail(email))
+    Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.empty());
 
     assertThrows(
-        UsernameNotFoundException.class, () -> this.userDetailsService.loadUserByUsername(email));
+        UsernameNotFoundException.class,
+        () -> this.userDetailsService.loadUserByUsername(username));
   }
 
   // TODO: Successful Junit test - keep commented code but it returns an exception when it shouldn't

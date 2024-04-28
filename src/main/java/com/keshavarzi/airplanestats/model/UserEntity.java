@@ -36,8 +36,8 @@ public final class UserEntity implements Cloneable {
   private Long userId;
 
   @Nonnull
-  @Column(name = "email", table = "user", unique = true, nullable = false)
-  private String email;
+  @Column(name = "username", table = "user", unique = true, nullable = false)
+  private String username;
 
   @Nonnull
   @Column(name = "password", table = "user", nullable = false)

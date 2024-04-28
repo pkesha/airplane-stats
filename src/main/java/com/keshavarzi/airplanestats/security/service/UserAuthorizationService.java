@@ -5,9 +5,9 @@ import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.repository.RoleEntityRepository;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
 import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRoleMissingException;
-import com.keshavarzi.airplanestats.security.exception.register.EmailAlreadyExistsException;
-import com.keshavarzi.airplanestats.security.exception.register.InvalidEmailException;
 import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
+import com.keshavarzi.airplanestats.security.exception.register.InvalidUsernameException;
+import com.keshavarzi.airplanestats.security.exception.register.UserAlreadyExistsException;
 import com.keshavarzi.airplanestats.security.jwt.JwtUtility;
 import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
 import jakarta.annotation.Nonnull;
@@ -54,31 +54,31 @@ public class UserAuthorizationService {
   /**
    * Registers a new user if criteria are met.
    *
-   * @param userEmail User's email
+   * @param username User's username
    * @param password User's password
    * @throws InvalidPasswordException Invalid password length
-   * @throws InvalidEmailException Invalid Email formatting
-   * @throws EmailAlreadyExistsException Email already exists in database
+   * @throws InvalidUsernameException Invalid Email formatting
+   * @throws UserAlreadyExistsException Email already exists in database
    *     (plane_stats.user_data.user)
    * @throws AuthorizationRoleMissingException Authorization role does not exist in database
    *     (plane_stats.user_data.role)
    */
-  public final UserEntity register(@NonNull final String userEmail, @NonNull final String password)
+  public final UserEntity register(@NonNull final String username, @NonNull final String password)
       throws InvalidPasswordException,
-          InvalidEmailException,
-          EmailAlreadyExistsException,
+          InvalidUsernameException,
+          UserAlreadyExistsException,
           AuthorizationRoleMissingException {
-    if (!VALID_EMAIL_ADDRESS.matcher(userEmail).matches()) {
-      throw new InvalidEmailException(userEmail);
+    if (!VALID_EMAIL_ADDRESS.matcher(username).matches()) {
+      throw new InvalidUsernameException(username);
     } else if (!((password.length() >= 8) && (password.length() <= 15))) {
       throw new InvalidPasswordException("Invalid password length");
-    } else if (this.userEntityRepository.findUserEntityByEmail(userEmail).isPresent()) {
-      throw new EmailAlreadyExistsException(userEmail);
+    } else if (this.userEntityRepository.findUserEntityByUsername(username).isPresent()) {
+      throw new UserAlreadyExistsException(username);
     } else if (this.roleEntityRepository.findRoleEntityByRoleName("USER").isEmpty()) {
       throw new AuthorizationRoleMissingException("USER");
     } else {
       UserEntity userEntity = new UserEntity();
-      userEntity.setEmail(userEmail);
+      userEntity.setUsername(username);
       userEntity.setPassword(this.passwordEncoder.encode(password));
       RoleEntity roles = this.roleEntityRepository.findRoleEntityByRoleName("USER").get();
 
@@ -90,18 +90,18 @@ public class UserAuthorizationService {
   /**
    * Login's in a user if criteria is met and @code{AuthorizationResponse}.
    *
-   * @param email user email for login
+   * @param username user username for login
    * @param password user password for login
    * @return @code{AuthorizationResponse} will encapsulate authorization response
    */
   public final AuthorizationResponse login(
-      @NonNull final String email, @NonNull final String password) {
-    if (this.userEntityRepository.findUserEntityByEmail(email).isEmpty()) {
-      throw new UsernameNotFoundException(email + "not found");
+      @NonNull final String username, @NonNull final String password) {
+    if (this.userEntityRepository.findUserEntityByUsername(username).isEmpty()) {
+      throw new UsernameNotFoundException(username + "not found");
     } else {
       Authentication authentication =
           this.authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(email, password));
+              new UsernamePasswordAuthenticationToken(username, password));
       SecurityContextHolder.getContext().setAuthentication(authentication);
       String token = this.jwtUtility.generateToken(authentication);
       AuthorizationResponse authorizationResponse = new AuthorizationResponse();

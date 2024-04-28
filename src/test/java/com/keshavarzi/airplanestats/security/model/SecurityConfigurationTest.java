@@ -1,6 +1,5 @@
 package com.keshavarzi.airplanestats.security.model;
 
-
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
 import com.keshavarzi.airplanestats.security.jwt.JwtAuthenticationEntryPoint;
 import com.keshavarzi.airplanestats.security.jwt.JwtUtility;

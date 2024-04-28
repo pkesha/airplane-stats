@@ -66,17 +66,17 @@ class JwtAuthenticationFilterTest {
   @Test
   void doFilterInternalServletException() throws ServletException, IOException {
     String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
-    String email = "validEmailDoFilterInternalServletException@test.com";
-    String password = "password";
+    String username = "validUsernameDoFilterInternalServletException@test.com";
+    String password = "validPass";
     Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
     GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
     grantedAuthorities.add(grantedAuthority);
 
-    UserDetails userDetails = new User(email, password, grantedAuthorities);
+    UserDetails userDetails = new User(username, password, grantedAuthorities);
 
-    Mockito.when(this.jwtUtility.getEmailFromJwt(token)).thenReturn(email);
+    Mockito.when(this.jwtUtility.getUsernameFromJwt(token)).thenReturn(username);
 
-    Mockito.when(this.userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
+    Mockito.when(this.userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
 
     Mockito.doThrow(new ServletException())
         .when(this.filterChain)
@@ -93,17 +93,17 @@ class JwtAuthenticationFilterTest {
   @Test
   void doFilterInternalIOException() throws ServletException, IOException {
     String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
-    String email = "validEmailDoFilterInternalIOException@test.com";
+    String username = "validUsernameDoFilterInternalIOException@test.com";
     String password = "password";
     Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
     GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
     grantedAuthorities.add(grantedAuthority);
 
-    UserDetails userDetails = new User(email, password, grantedAuthorities);
+    UserDetails userDetails = new User(username, password, grantedAuthorities);
 
-    Mockito.when(this.jwtUtility.getEmailFromJwt(token)).thenReturn(email);
+    Mockito.when(this.jwtUtility.getUsernameFromJwt(token)).thenReturn(username);
 
-    Mockito.when(this.userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
+    Mockito.when(this.userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
 
     Mockito.doThrow(new IOException()).when(this.filterChain).doFilter(this.request, this.response);
 
@@ -117,15 +117,15 @@ class JwtAuthenticationFilterTest {
   @Test
   void doFilterInternalSuccess() {
     String token = JwtSecurityConstants.TOKEN_PREFIX + "test";
-    String email = "validEmailDoFilterInternalIOException@test.com";
+    String username = "validUsernameDoFilterInternalIOException@test.com";
     String password = "password";
     Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
     GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
     grantedAuthorities.add(grantedAuthority);
     UserDetails userDetails;
-    userDetails = new User(email, password, grantedAuthorities);
+    userDetails = new User(username, password, grantedAuthorities);
     TestingAuthenticationToken testingAuthenticationToken =
-        new TestingAuthenticationToken(email, password);
+        new TestingAuthenticationToken(username, password);
 
     Mockito.when(this.request.getHeader(JwtSecurityConstants.AUTHORIZATION_HEADER))
         .thenReturn(token);
@@ -134,9 +134,9 @@ class JwtAuthenticationFilterTest {
         new WebAuthenticationDetailsSource().buildDetails(this.request));
 
     // TODO why not passing in token???
-    Mockito.when(this.jwtUtility.getEmailFromJwt(anyString())).thenReturn(email);
+    Mockito.when(this.jwtUtility.getUsernameFromJwt(anyString())).thenReturn(username);
 
-    Mockito.when(this.userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
+    Mockito.when(this.userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
 
     assertDoesNotThrow(
         () ->

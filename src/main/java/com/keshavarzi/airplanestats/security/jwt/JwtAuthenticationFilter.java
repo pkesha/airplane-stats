@@ -36,8 +36,8 @@ public final class JwtAuthenticationFilter extends OncePerRequestFilter {
    * <p>Provides HttpServletRequest and HttpServletResponse arguments instead of the default
    * ServletRequest and ServletResponse ones. This is a form of middleware. The request will be
    * intercepted and will be filtered for correct credentials It sets the AuthenticationToken, if
-   * it's valid token, to the SecurityContext The token will be associated with email and retrieve
-   * the {@code UserDetails}
+   * it's valid token, to the SecurityContext The token will be associated with username and
+   * retrieve the {@code UserDetails}
    *
    * @param request HTTP request to filter for correct credentials
    * @param response HTTP with a response
@@ -50,22 +50,20 @@ public final class JwtAuthenticationFilter extends OncePerRequestFilter {
       @Nonnull final HttpServletResponse response,
       @Nonnull final FilterChain filterChain)
       throws ServletException, IOException {
-    String token = this.getJwtFromRequest(request);
     try {
-      assert token != null;
+      String token = this.getJwtFromRequest(request);
       this.jwtUtility.validateToken(token);
-      String email = this.jwtUtility.getEmailFromJwt(token);
-      UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
-
+      String username = this.jwtUtility.getUsernameFromJwt(token);
+      UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
       UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-          new UsernamePasswordAuthenticationToken(userDetails, userDetails.getAuthorities());
+          new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
       usernamePasswordAuthenticationToken.setDetails(
           new WebAuthenticationDetailsSource().buildDetails(request));
-
       SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
     } catch (
     AuthenticationCredentialsNotFoundException authenticationCredentialsNotFoundException) {
-      System.out.println(authenticationCredentialsNotFoundException.getMessage());
+      System.out.println(
+          "Authentication failed: " + authenticationCredentialsNotFoundException.getMessage());
     } finally {
       filterChain.doFilter(request, response);
     }
@@ -77,13 +75,13 @@ public final class JwtAuthenticationFilter extends OncePerRequestFilter {
    * @param request The request to check for bearer token
    * @return Bearer token to check
    */
-  private String getJwtFromRequest(final HttpServletRequest request) {
+  private String getJwtFromRequest(@Nonnull final HttpServletRequest request) {
     String bearerToken = request.getHeader(JwtSecurityConstants.AUTHORIZATION_HEADER);
     if (StringUtils.hasText(bearerToken)
         && bearerToken.startsWith(JwtSecurityConstants.TOKEN_PREFIX)) {
       return bearerToken.substring(7);
     } else {
-      return null;
+      return JwtSecurityConstants.NO_BEARER;
     }
   }
 }

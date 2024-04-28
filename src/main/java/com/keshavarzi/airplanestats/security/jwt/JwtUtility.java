@@ -16,28 +16,28 @@ public class JwtUtility {
    *
    * @param authentication Authentication returned authentication manager when {@code
    *     UsernamePasswordAuthenticationToken} is added to the manager
-   * @return Token based current data, expiration data, email, and secret key object.
+   * @return Token based current data, expiration data, username, and secret key object.
    */
   public final String generateToken(@NonNull final Authentication authentication) {
-    String email = authentication.getName();
+    String username = authentication.getName();
     Date currentDate = new Date();
     Date expireDate = new Date(currentDate.getTime() + JwtSecurityConstants.JWT_EXPIRATION);
 
     return Jwts.builder()
-        .subject(email)
+        .subject(username)
         .issuedAt(currentDate)
         .expiration(expireDate)
-        .signWith(JwtSecurityConstants.SECRET_KEY)
+        .signWith(JwtSecurityConstants.SECRET_KEY, Jwts.SIG.HS512)
         .compact();
   }
 
   /**
-   * Returns email from a token.
+   * Returns username from a token.
    *
    * @param token Used for parsing
-   * @return User's email
+   * @return User's username
    */
-  protected String getEmailFromJwt(@NonNull final String token) {
+  protected String getUsernameFromJwt(@NonNull final String token) {
 
     Claims claims =
         Jwts.parser()
@@ -56,9 +56,13 @@ public class JwtUtility {
    */
   protected final void validateToken(@NonNull final String token) {
     try {
-      Jwts.parser().verifyWith(JwtSecurityConstants.SECRET_KEY).build().parseSignedClaims(token);
+      Jwts.parser()
+          .verifyWith(JwtSecurityConstants.SECRET_KEY)
+          .build()
+          .parseSignedClaims(token)
+          .getPayload();
     } catch (Exception exception) {
-      throw new AuthenticationCredentialsNotFoundException("JWT Expired or incorrect");
+      throw new AuthenticationCredentialsNotFoundException("JWT Expired or incorrect: " + token);
     }
   }
 }

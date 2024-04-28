@@ -1,7 +1,7 @@
 package com.keshavarzi.airplanestats.security.exception.register;
 
-/** Custom Exception to indicate that email has already been registered. */
-public class EmailAlreadyExistsException extends Exception {
+/** Custom Exception to indicate that Username/Email has already been registered. */
+public class UserAlreadyExistsException extends Exception {
 
   /**
    * Constructs a new exception with the specified detail message. The cause is not initialized, and
@@ -10,7 +10,7 @@ public class EmailAlreadyExistsException extends Exception {
    * @param message the detail message. The detail message is saved for later retrieval by the
    *     {@link #getMessage()} method.
    */
-  public EmailAlreadyExistsException(final String message) {
-    super("Email Exists: " + message);
+  public UserAlreadyExistsException(final String message) {
+    super("Username Exists: " + message);
   }
 }

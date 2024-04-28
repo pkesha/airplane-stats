@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.jsonwebtoken.Jwts;
 import java.util.Date;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,132 +26,85 @@ import org.springframework.web.context.WebApplicationContext;
 @AutoConfigureWebMvc
 @SpringBootTest(classes = JwtUtility.class)
 class JwtUtilityTest {
+  private static final String validUsername0 = "validEmail0@test.com";
+  private static final String validPassword0 = "validPassword0";
+  private static final String validUsername1 = "validEmail1@test.com";
+  private static final String validPassword1 = "validPassword1";
   @Autowired MockMvc mockMvc;
   @Autowired WebApplicationContext webApplicationContext;
   @MockBean AuthenticationManager authenticationManager;
   @Autowired JwtUtility jwtUtility;
+  Authentication authentication0 = new TestingAuthenticationToken(validUsername0, validPassword1);
+
+  Authentication authentication1 = new TestingAuthenticationToken(validUsername1, validPassword0);
 
   private String generateToken(Authentication authentication) {
-    String email = authentication.getName();
+    String username = authentication.getName();
     Date currentDate = new Date();
     Date expireDate = new Date(currentDate.getTime() + JwtSecurityConstants.JWT_EXPIRATION);
 
     return Jwts.builder()
-        .subject(email)
+        .subject(username)
         .issuedAt(currentDate)
         .expiration(expireDate)
-        .signWith(JwtSecurityConstants.SECRET_KEY)
+        .signWith(JwtSecurityConstants.SECRET_KEY, Jwts.SIG.HS512)
         .compact();
+  }
+
+  @BeforeEach
+  void setUp() {
+    Mockito.when(
+            this.authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(validUsername0, validPassword0)))
+        .thenReturn(this.authentication0);
+
+    Mockito.when(
+            this.authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(validUsername1, validPassword1)))
+        .thenReturn(authentication1);
   }
 
   @Test
   void generateTokenTest() {
-    String email = "validEmailGenerateTokenTest@test.com";
-    String password = "validPass";
-    Authentication authentication = new TestingAuthenticationToken(email, password);
-
-    Mockito.when(
-            this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)))
-        .thenReturn(authentication);
-
-    String tokenExpected = this.generateToken(authentication);
-    String tokenActual = this.jwtUtility.generateToken(authentication);
+    String tokenExpected = this.generateToken(this.authentication0);
+    String tokenActual = this.jwtUtility.generateToken(this.authentication0);
 
     assertEquals(tokenExpected, tokenActual);
   }
 
   @Test
-  void generateDifferentTokenWithDifferentEmailTest() {
-    String email0 = "validEmailGenerateDifferentTokenWithDifferentEmailTest@test.com";
-    String password0 = "validPass0";
-
-    String email1 = "validEmail@test.com";
-    String password1 = "validPass1";
-
-    Authentication authentication0 = new TestingAuthenticationToken(email0, password0);
-    Authentication authentication1 = new TestingAuthenticationToken(email1, password1);
-
-    Mockito.when(
-            this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email0, password0)))
-        .thenReturn(authentication0);
-
-    Mockito.when(
-            this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email1, password1)))
-        .thenReturn(authentication1);
-
-    assertNotEquals(authentication0, authentication1);
+  void generateDifferentTokenWithDifferentUsername() {
+    assertNotEquals(this.authentication0, this.authentication1);
   }
 
   @Test
-  void getEmailFromJwt() {
-    String email = "validEmailGetEmailFromJwt";
-    String password = "validPass";
-    Authentication authentication = new TestingAuthenticationToken(email, password);
+  void getUsernameFromJwt() {
+    String tokenExpected = this.generateToken(this.authentication0);
 
-    Mockito.when(
-            this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)))
-        .thenReturn(authentication);
-
-    String tokenExpected = this.generateToken(authentication);
-
-    assertEquals(email, this.jwtUtility.getEmailFromJwt(tokenExpected));
+    assertEquals(validUsername0, this.jwtUtility.getUsernameFromJwt(tokenExpected));
   }
 
   @Test
-  void emailsAreDifferentFromJwtTest() {
-    String email0 = "validEmailEmailsAreDifferentFromJwtTest@test.com";
-    String password0 = "validPass0";
+  void usernamesAreDifferentFromJwtTest() {
+    String token0 = this.generateToken(this.authentication0);
+    String token1 = this.generateToken(this.authentication1);
 
-    String email1 = "validEmail@test.com";
-    String password1 = "validPass1";
+    String tokenUsername0 = this.jwtUtility.getUsernameFromJwt(token0);
+    String tokenUsername1 = this.jwtUtility.getUsernameFromJwt(token1);
 
-    Authentication authentication0 = new TestingAuthenticationToken(email0, password0);
-    Authentication authentication1 = new TestingAuthenticationToken(email1, password1);
-
-    Mockito.when(
-            this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email0, password0)))
-        .thenReturn(authentication0);
-
-    Mockito.when(
-            this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email1, password1)))
-        .thenReturn(authentication1);
-
-    String token0 = this.generateToken(authentication0);
-    String token1 = this.generateToken(authentication1);
-
-    String tokenEmail0 = this.jwtUtility.getEmailFromJwt(token0);
-    String tokenEmail1 = this.jwtUtility.getEmailFromJwt(token1);
-
-    assertNotEquals(tokenEmail0, tokenEmail1);
+    assertNotEquals(tokenUsername0, tokenUsername1);
   }
 
   @Test
   void validatedTokenSuccess() {
-    String email0 = "validatedTokenSuccess@test.com";
-    String password0 = "validPass0";
-    Authentication authentication0 = new TestingAuthenticationToken(email0, password0);
-    String token = this.generateToken(authentication0);
+    String token = this.generateToken(this.authentication0);
 
     assertDoesNotThrow(() -> this.jwtUtility.validateToken(token));
   }
 
   @Test
   void validateTokenFails() {
-    String email = "validEmailValidatedToken@test.com";
-    String password = "validPass";
     String token = "invalidToken";
-    Authentication authentication = new TestingAuthenticationToken(email, password);
-
-    Mockito.when(
-            this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)))
-        .thenReturn(authentication);
 
     assertThrows(Exception.class, () -> this.jwtUtility.validateToken(token));
   }
