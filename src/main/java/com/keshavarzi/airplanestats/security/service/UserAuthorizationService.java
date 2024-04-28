@@ -57,7 +57,7 @@ public class UserAuthorizationService {
    * @param username User's username
    * @param password User's password
    * @throws InvalidPasswordException Invalid password length
-   * @throws InvalidUsernameException Invalid Email formatting
+   * @throws InvalidUsernameException Invalid Username formatting
    * @throws UserAlreadyExistsException Email already exists in database
    *     (plane_stats.user_data.user)
    * @throws AuthorizationRoleMissingException Authorization role does not exist in database

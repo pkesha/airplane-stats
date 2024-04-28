@@ -1,6 +1,6 @@
 package com.keshavarzi.airplanestats.security.exception.register;
 
-/** Custom Exception to indicate that Username/Email has already been registered. */
+/** Custom Exception to indicate that Email has already been registered. */
 public class UserAlreadyExistsException extends Exception {
 
   /**
