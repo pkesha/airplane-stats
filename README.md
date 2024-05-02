@@ -13,7 +13,7 @@ FE comms with backend: sequence or communication diagram
 ### Unorganized notes
 
 - The application is represented as a user 'airplane_stats_project' for the database.  
-  It currently has been granted privilleges to all data in all tables & schemas to modify data.
+  It currently has been granted privileges to all data in all tables & schemas to modify data.
 
 ### Reference Documentation
 

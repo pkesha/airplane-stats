@@ -3,7 +3,7 @@ POST http://localhost:8080/api/user/authorization/register
 Content-Type: application/json
 
 {
-  "username": "test9@test.com",
+  "username": "rokhak@test.com",
   "password": "password"
 }
 
@@ -14,5 +14,6 @@ Content-Type: application/json
 
 {
   "username": "test9@test.com",
-  "password": "password"
+  "password": "password",
+  "token": null
 }

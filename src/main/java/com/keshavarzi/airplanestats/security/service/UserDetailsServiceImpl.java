@@ -1,11 +1,10 @@
 package com.keshavarzi.airplanestats.security.service;
 
-import com.keshavarzi.airplanestats.model.RoleEntity;
 import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.repository.UserEntityRepository;
-import java.util.ArrayList;
+import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRoleMissingException;
 import java.util.Collection;
-import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,35 +30,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
    * @throws UsernameNotFoundException username is not found
    */
   @Override
-  public UserDetails loadUserByUsername(@NonNull final String username)
-      throws UsernameNotFoundException {
+  public UserDetails loadUserByUsername(@NonNull final String username) {
     UserEntity userEntity =
         this.userEntityRepository
             .findUserEntityByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+    Collection<GrantedAuthority> grantedAuthoritiesToUser =
+        userEntity
+            .getRoleEntities()
             .orElseThrow(
-                () -> new UsernameNotFoundException("Username was not found: " + username));
+                () -> new AuthorizationRoleMissingException("Authorization roles not found"))
+            .stream()
+            .map((roleEntity) -> new SimpleGrantedAuthority(roleEntity.getRoleName()))
+            .collect(Collectors.toList());
 
-    Collection<GrantedAuthority> grantedAuthoritiesToUser;
-    try {
-      grantedAuthoritiesToUser = this.mapRolesToAuthorities(userEntity.getRoleEntities());
-    } catch (CloneNotSupportedException e) {
-      throw new RuntimeException("Error adding roles to user: " + e);
-    }
     return new User(userEntity.getUsername(), userEntity.getPassword(), grantedAuthoritiesToUser);
-  }
-
-  /**
-   * Use Spring security roles to associate with a user.
-   *
-   * @param roleEntities will send in list of roleEntities
-   * @return List of Spring Security Roles
-   */
-  protected Collection<GrantedAuthority> mapRolesToAuthorities(
-      final Collection<RoleEntity> roleEntities) {
-    List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-    for (RoleEntity roleEntity : roleEntities) {
-      grantedAuthorities.add(new SimpleGrantedAuthority(roleEntity.getRoleName()));
-    }
-    return grantedAuthorities;
   }
 }

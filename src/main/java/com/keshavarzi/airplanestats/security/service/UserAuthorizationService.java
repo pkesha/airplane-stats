@@ -8,8 +8,10 @@ import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRol
 import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.security.exception.register.InvalidUsernameException;
 import com.keshavarzi.airplanestats.security.exception.register.UserAlreadyExistsException;
+import com.keshavarzi.airplanestats.security.jwt.JwtSecurityConstants;
 import com.keshavarzi.airplanestats.security.jwt.JwtUtility;
 import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
+import com.keshavarzi.airplanestats.security.model.response.RegistrationResponse;
 import jakarta.annotation.Nonnull;
 import java.util.Collections;
 import java.util.regex.Pattern;
@@ -63,7 +65,8 @@ public class UserAuthorizationService {
    * @throws AuthorizationRoleMissingException Authorization role does not exist in database
    *     (plane_stats.user_data.role)
    */
-  public final UserEntity register(@NonNull final String username, @NonNull final String password)
+  public final RegistrationResponse register(
+      @NonNull final String username, @NonNull final String password)
       throws InvalidPasswordException,
           InvalidUsernameException,
           UserAlreadyExistsException,
@@ -80,15 +83,17 @@ public class UserAuthorizationService {
       UserEntity userEntity = new UserEntity();
       userEntity.setUsername(username);
       userEntity.setPassword(this.passwordEncoder.encode(password));
+
       RoleEntity roles = this.roleEntityRepository.findRoleEntityByRoleName("USER").get();
 
       userEntity.setRoleEntities(Collections.singletonList(roles));
-      return this.userEntityRepository.save(userEntity);
+      this.userEntityRepository.save(userEntity);
+      return new RegistrationResponse("User created: " + username);
     }
   }
 
   /**
-   * Login's in a user if criteria is met and @code{AuthorizationResponse}.
+   * Login's in a user if criteria is met with @code{AuthorizationResponse}.
    *
    * @param username user username for login
    * @param password user password for login
@@ -96,17 +101,14 @@ public class UserAuthorizationService {
    */
   public final AuthorizationResponse login(
       @NonNull final String username, @NonNull final String password) {
-    if (this.userEntityRepository.findUserEntityByUsername(username).isEmpty()) {
-      throw new UsernameNotFoundException(username + "not found");
-    } else {
-      Authentication authentication =
-          this.authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(username, password));
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-      String token = this.jwtUtility.generateToken(authentication);
-      AuthorizationResponse authorizationResponse = new AuthorizationResponse();
-      authorizationResponse.setAccessToken(token);
-      return authorizationResponse;
-    }
+    this.userEntityRepository
+        .findUserEntityByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    Authentication authentication =
+        this.authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(username, password));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    String token = this.jwtUtility.generateToken(authentication);
+    return new AuthorizationResponse(token, JwtSecurityConstants.TOKEN_PREFIX_BEARER, null);
   }
 }

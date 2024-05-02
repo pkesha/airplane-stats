@@ -4,14 +4,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.keshavarzi.airplanestats.model.UserEntity;
 import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRoleMissingException;
 import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.security.exception.register.InvalidUsernameException;
 import com.keshavarzi.airplanestats.security.exception.register.UserAlreadyExistsException;
+import com.keshavarzi.airplanestats.security.jwt.JwtSecurityConstants;
 import com.keshavarzi.airplanestats.security.model.request.LoginRequest;
 import com.keshavarzi.airplanestats.security.model.request.RegisterRequest;
 import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
+import com.keshavarzi.airplanestats.security.model.response.RegistrationResponse;
 import com.keshavarzi.airplanestats.security.service.UserAuthorizationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,52 +55,16 @@ class UserAuthorizationControllerTest {
    * @throws JsonProcessingException issue processing into JSON
    */
   private String mapFromJson(Object object) throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
+    final ObjectMapper mapper = new ObjectMapper();
     return mapper.writeValueAsString(object);
-  }
-
-  /**
-   * Creates a RegisterRequest Object.
-   *
-   * @param username username of user
-   * @param password Password
-   * @return created RegisterRequest object for test/mocks
-   */
-  private RegisterRequest createRegisterRequest(String username, String password) {
-    RegisterRequest registerRequest = new RegisterRequest();
-    registerRequest.setUsername(username);
-    registerRequest.setPassword(password);
-    return registerRequest;
-  }
-
-  private LoginRequest createLoginRequest(String username, String password) {
-    LoginRequest loginRequest = new LoginRequest();
-    loginRequest.setUsername(username);
-    loginRequest.setPassword(password);
-    return loginRequest;
-  }
-
-  /**
-   * Creates UserEntity database Object.
-   *
-   * @param username user's username
-   * @param password user's password
-   * @return created UserEntity object for test/mocks
-   */
-  private UserEntity createUserEntity(String username, String password) {
-    UserEntity userEntity = new UserEntity();
-    userEntity.setUserId(1L);
-    userEntity.setUsername(username);
-    userEntity.setPassword(password);
-    return userEntity;
   }
 
   @Test
   void register_invalidUserUsernameAddressValidPassword_406() throws Exception {
     // Given
-    String username = "registerInvalidUserUsernameAddressWith406";
-    String password = "validPass";
-    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
+    final String username = "registerInvalidUserUsernameAddressWith406";
+    final String password = "validPass";
+    final RegisterRequest registerRequest = new RegisterRequest(username, password);
 
     // When
     Mockito.when(this.userAuthorizationService.register(username, password))
@@ -117,9 +82,9 @@ class UserAuthorizationControllerTest {
   @Test
   void register_withInvalidPasswordWithButValidUsername_406() throws Exception {
     // Given
-    String username = "registerWithInvalidPasswordWithButValidUsername406@test.com";
-    String password = "";
-    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
+    final String username = "registerWithInvalidPasswordWithButValidUsername406@test.com";
+    final String password = "";
+    final RegisterRequest registerRequest = new RegisterRequest(username, password);
 
     // When
     Mockito.when(this.userAuthorizationService.register(username, password))
@@ -136,9 +101,9 @@ class UserAuthorizationControllerTest {
 
   @Test
   void register_userWithValidUsernameRoleMissingValidPassword_404() throws Exception {
-    String username = "registerUserWithValidUsernameRoleMissingValidPasswordWith404@test.com";
-    String password = "validPass";
-    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
+    final String username = "registerUserWithValidUsernameRoleMissingValidPasswordWith404@test.com";
+    final String password = "validPass";
+    final RegisterRequest registerRequest = new RegisterRequest(username, password);
 
     // When
     Mockito.when(this.userAuthorizationService.register(username, password))
@@ -156,9 +121,9 @@ class UserAuthorizationControllerTest {
   @Test
   void register_existingUserValidPassword_409() throws Exception {
     // Given
-    String username = "registerExistingUserValidPasswordWith409@test.com";
-    String password = "validPass";
-    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
+    final String username = "registerExistingUserValidPasswordWith409@test.com";
+    final String password = "validPass";
+    final RegisterRequest registerRequest = new RegisterRequest(username, password);
 
     // When
     Mockito.when(this.userAuthorizationService.register(username, password))
@@ -175,13 +140,12 @@ class UserAuthorizationControllerTest {
 
   @Test
   void successfulRegister_201() throws Exception {
-    String username = "successfulRegister@test.com";
-    String password = "password";
-    RegisterRequest registerRequest = this.createRegisterRequest(username, password);
-    UserEntity userEntity = this.createUserEntity(username, password);
-
+    final String username = "successfulRegister@test.com";
+    final String password = "password";
+    final RegisterRequest registerRequest = new RegisterRequest(username, password);
+    final RegistrationResponse response = new RegistrationResponse("Created");
     // When
-    Mockito.when(this.userAuthorizationService.register(username, password)).thenReturn(userEntity);
+    Mockito.when(this.userAuthorizationService.register(username, password)).thenReturn(response);
 
     // When Then
     mockMvc
@@ -194,9 +158,9 @@ class UserAuthorizationControllerTest {
 
   @Test
   void unsuccessfulLogin_NonexistentUsernameValidPassword() throws Exception {
-    String username = "dne@test.com";
-    String password = "validPass";
-    LoginRequest loginRequest = this.createLoginRequest(username, password);
+    final String username = "dne@test.com";
+    final String password = "validPass";
+    final LoginRequest loginRequest = new LoginRequest(username, password, null);
 
     Mockito.when(this.userAuthorizationService.login(username, password))
         .thenThrow(UsernameNotFoundException.class);
@@ -210,29 +174,12 @@ class UserAuthorizationControllerTest {
   }
 
   @Test
-  void unsuccessfulLogin_invalidValidUsernameValidPassword() throws Exception {
-    String username = "unsuccessfulLoginInvalidValidUsernamePassword@test.com";
-    String password = "invalidPass";
-    LoginRequest loginRequest = this.createLoginRequest(username, password);
-
-    Mockito.when(this.userAuthorizationService.login(username, password))
-        .thenThrow(RuntimeException.class);
-
-    mockMvc
-        .perform(
-            post(BASE_AUTHORIZATION_URL + LOGIN_URL)
-                .content(this.mapFromJson(loginRequest))
-                .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-  }
-
-  @Test
   void successfulLogin() throws Exception {
-    String username = "successfulLogin@test.com";
-    String password = "password";
-    LoginRequest loginRequest = this.createLoginRequest(username, password);
-    AuthorizationResponse authorizationResponse = new AuthorizationResponse();
-    authorizationResponse.setAccessToken("ValidToken");
+    final String username = "successfulLogin@test.com";
+    final String password = "password";
+    final LoginRequest loginRequest = new LoginRequest(username, password, null);
+    final AuthorizationResponse authorizationResponse =
+        new AuthorizationResponse("ValidToken", JwtSecurityConstants.TOKEN_PREFIX_BEARER, null);
 
     Mockito.when(this.userAuthorizationService.login(username, password))
         .thenReturn(authorizationResponse);

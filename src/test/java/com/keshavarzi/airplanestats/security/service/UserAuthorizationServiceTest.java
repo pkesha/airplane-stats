@@ -11,8 +11,10 @@ import com.keshavarzi.airplanestats.security.exception.register.AuthorizationRol
 import com.keshavarzi.airplanestats.security.exception.register.InvalidPasswordException;
 import com.keshavarzi.airplanestats.security.exception.register.InvalidUsernameException;
 import com.keshavarzi.airplanestats.security.exception.register.UserAlreadyExistsException;
+import com.keshavarzi.airplanestats.security.jwt.JwtSecurityConstants;
 import com.keshavarzi.airplanestats.security.jwt.JwtUtility;
 import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
+import com.keshavarzi.airplanestats.security.model.response.RegistrationResponse;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -80,8 +82,8 @@ public class UserAuthorizationServiceTest {
 
   @Test
   void registerWithInvalidUsername() {
-    String username = "registerWithInvalidUsername";
-    String password = "password";
+    final String username = "registerWithInvalidUsername";
+    final String password = "password";
 
     assertThrows(
         InvalidUsernameException.class,
@@ -90,8 +92,8 @@ public class UserAuthorizationServiceTest {
 
   @Test
   void registerWithInvalidPasswordLessThan8Characters() {
-    String username = "registerWithInvalidPasswordLessThan8Characters@test.com";
-    String password = "test";
+    final String username = "registerWithInvalidPasswordLessThan8Characters@test.com";
+    final String password = "test";
 
     assertThrows(
         InvalidPasswordException.class,
@@ -100,8 +102,8 @@ public class UserAuthorizationServiceTest {
 
   @Test
   void registerWithInvalidPasswordMoreThan15Characters() {
-    String username = "registerWithInvalidPasswordMoreThan15Characters@test.com";
-    String password = "registerWithInvalidPasswordMoreThan15Characters";
+    final String username = "registerWithInvalidPasswordMoreThan15Characters@test.com";
+    final String password = "registerWithInvalidPasswordMoreThan15Characters";
 
     assertThrows(
         InvalidPasswordException.class,
@@ -110,9 +112,9 @@ public class UserAuthorizationServiceTest {
 
   @Test
   void registerWithExistingUsername() {
-    String username = "validUsernameTest@test.com";
-    String password = "validPassword";
-    UserEntity userEntity = this.createUserEntity(username, password);
+    final String username = "validUsernameTest@test.com";
+    final String password = "validPassword";
+    final UserEntity userEntity = this.createUserEntity(username, password);
 
     Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.of(userEntity));
@@ -124,8 +126,8 @@ public class UserAuthorizationServiceTest {
 
   @Test
   void registerWithMissingAuthorizationRole() {
-    String username = "validUsernameTest@test.com";
-    String password = "validPassword";
+    final String username = "validUsernameTest@test.com";
+    final String password = "validPassword";
 
     Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.empty());
@@ -142,11 +144,13 @@ public class UserAuthorizationServiceTest {
           InvalidPasswordException,
           AuthorizationRoleMissingException,
           InvalidUsernameException {
-    String username = "successfulRegistration@test.com";
-    String password = "validPassword";
+    final String username = "successfulRegistration@test.com";
+    final String password = "validPassword";
 
-    UserEntity userEntity = this.createUserEntity(username, password);
-    RoleEntity roleEntity = this.createUserRoleEntity();
+    final RegistrationResponse registrationResponse =
+        new RegistrationResponse("User created: " + username);
+    final UserEntity userEntity = new UserEntity();
+    final RoleEntity roleEntity = this.createUserRoleEntity();
 
     Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.empty());
@@ -156,13 +160,13 @@ public class UserAuthorizationServiceTest {
     Mockito.when(this.userEntityRepository.save(Mockito.any(UserEntity.class)))
         .thenReturn(userEntity);
 
-    assertEquals(userEntity, this.userAuthorizationService.register(username, password));
+    assertEquals(registrationResponse, this.userAuthorizationService.register(username, password));
   }
 
   @Test
   void loginFailedUsernameNotFound() {
-    String username = "usernameDoesNotExist@test.com";
-    String password = "validPass";
+    final String username = "usernameDoesNotExist@test.com";
+    final String password = "validPass";
 
     Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.empty());
@@ -174,8 +178,8 @@ public class UserAuthorizationServiceTest {
 
   @Test
   void loginFailedAuthentication() {
-    String username = "loginFailedAuthentication@test.com";
-    String password = "invalidPass";
+    final String username = "loginFailedAuthentication@test.com";
+    final String password = "invalidPass";
 
     UserEntity userEntity = this.createUserEntity(username, password);
     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
@@ -192,13 +196,14 @@ public class UserAuthorizationServiceTest {
 
   @Test
   void successfulLogin() {
-    String username = "loginFailedAuthentication@test.com";
-    String password = "invalidPass";
-    String token = "token";
-    UserEntity userEntity = this.createUserEntity(username, password);
-    TestingAuthenticationToken authentication = new TestingAuthenticationToken(username, password);
-    AuthorizationResponse expectedAuthorizationResponse = new AuthorizationResponse();
-    expectedAuthorizationResponse.setAccessToken(token);
+    final String username = "loginFailedAuthentication@test.com";
+    final String password = "invalidPass";
+    final String token = "token";
+    final UserEntity userEntity = this.createUserEntity(username, password);
+    final TestingAuthenticationToken authentication =
+        new TestingAuthenticationToken(username, password);
+    final AuthorizationResponse expectedAuthorizationResponse =
+        new AuthorizationResponse(token, JwtSecurityConstants.TOKEN_PREFIX_BEARER, null);
 
     Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.of(userEntity));

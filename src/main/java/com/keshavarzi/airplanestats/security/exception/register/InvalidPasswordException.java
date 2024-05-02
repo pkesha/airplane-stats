@@ -1,6 +1,7 @@
 package com.keshavarzi.airplanestats.security.exception.register;
 
 /** Custom Exception for invalid password/login attempt. */
+@SuppressWarnings({"CommentedOutCode", "GrazieInspection"})
 public class InvalidPasswordException extends Exception {
 
   /**

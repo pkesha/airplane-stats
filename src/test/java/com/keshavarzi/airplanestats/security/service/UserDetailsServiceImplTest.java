@@ -36,7 +36,7 @@ class UserDetailsServiceImplTest {
 
   @Test
   void loadUserByUsernameThatDoesNotExist() {
-    String username = "loadUserByUsernameThatDoesNotExist@test.com";
+    final String username = "loadUserByUsernameThatDoesNotExist@test.com";
 
     Mockito.when(this.userEntityRepository.findUserEntityByUsername(username))
         .thenReturn(Optional.empty());

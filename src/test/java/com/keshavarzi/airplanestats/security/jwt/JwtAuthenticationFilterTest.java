@@ -54,7 +54,8 @@ class JwtAuthenticationFilterTest {
         new JwtAuthenticationFilter(this.jwtUtility, this.userDetailsService);
 
     this.response.setHeader(
-        JwtSecurityConstants.AUTHORIZATION_HEADER, JwtSecurityConstants.TOKEN_PREFIX + " Test");
+        JwtSecurityConstants.AUTHORIZATION_HEADER,
+        JwtSecurityConstants.TOKEN_PREFIX_BEARER + " Test");
 
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(this.webApplicationContext)
@@ -65,14 +66,14 @@ class JwtAuthenticationFilterTest {
 
   @Test
   void doFilterInternalServletException() throws ServletException, IOException {
-    String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
-    String username = "validUsernameDoFilterInternalServletException@test.com";
-    String password = "validPass";
-    Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-    GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
+    final String token = JwtSecurityConstants.TOKEN_PREFIX_BEARER + " Test";
+    final String username = "validUsernameDoFilterInternalServletException@test.com";
+    final String password = "validPass";
+    final Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+    final GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
     grantedAuthorities.add(grantedAuthority);
 
-    UserDetails userDetails = new User(username, password, grantedAuthorities);
+    final UserDetails userDetails = new User(username, password, grantedAuthorities);
 
     Mockito.when(this.jwtUtility.getUsernameFromJwt(token)).thenReturn(username);
 
@@ -92,14 +93,14 @@ class JwtAuthenticationFilterTest {
   @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
   @Test
   void doFilterInternalIOException() throws ServletException, IOException {
-    String token = JwtSecurityConstants.TOKEN_PREFIX + " Test";
-    String username = "validUsernameDoFilterInternalIOException@test.com";
-    String password = "password";
-    Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-    GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
+    final String token = JwtSecurityConstants.TOKEN_PREFIX_BEARER + " Test";
+    final String username = "validUsernameDoFilterInternalIOException@test.com";
+    final String password = "password";
+    final Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+    final GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
     grantedAuthorities.add(grantedAuthority);
 
-    UserDetails userDetails = new User(username, password, grantedAuthorities);
+    final UserDetails userDetails = new User(username, password, grantedAuthorities);
 
     Mockito.when(this.jwtUtility.getUsernameFromJwt(token)).thenReturn(username);
 
@@ -116,15 +117,14 @@ class JwtAuthenticationFilterTest {
 
   @Test
   void doFilterInternalSuccess() {
-    String token = JwtSecurityConstants.TOKEN_PREFIX + "test";
-    String username = "validUsernameDoFilterInternalIOException@test.com";
-    String password = "password";
-    Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-    GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
+    final String token = JwtSecurityConstants.TOKEN_PREFIX_BEARER + "test";
+    final String username = "validUsernameDoFilterInternalIOException@test.com";
+    final String password = "password";
+    final Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+    final GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("USER");
     grantedAuthorities.add(grantedAuthority);
-    UserDetails userDetails;
-    userDetails = new User(username, password, grantedAuthorities);
-    TestingAuthenticationToken testingAuthenticationToken =
+    final UserDetails userDetails = new User(username, password, grantedAuthorities);
+    final TestingAuthenticationToken testingAuthenticationToken =
         new TestingAuthenticationToken(username, password);
 
     Mockito.when(this.request.getHeader(JwtSecurityConstants.AUTHORIZATION_HEADER))

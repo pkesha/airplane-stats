@@ -30,18 +30,19 @@ class JwtUtilityTest {
   private static final String validPassword0 = "validPassword0";
   private static final String validUsername1 = "validEmail1@test.com";
   private static final String validPassword1 = "validPassword1";
+  private final Authentication authentication0 =
+      new TestingAuthenticationToken(validUsername0, validPassword1);
+  private final Authentication authentication1 =
+      new TestingAuthenticationToken(validUsername1, validPassword0);
   @Autowired MockMvc mockMvc;
   @Autowired WebApplicationContext webApplicationContext;
   @MockBean AuthenticationManager authenticationManager;
   @Autowired JwtUtility jwtUtility;
-  Authentication authentication0 = new TestingAuthenticationToken(validUsername0, validPassword1);
-
-  Authentication authentication1 = new TestingAuthenticationToken(validUsername1, validPassword0);
 
   private String generateToken(Authentication authentication) {
-    String username = authentication.getName();
-    Date currentDate = new Date();
-    Date expireDate = new Date(currentDate.getTime() + JwtSecurityConstants.JWT_EXPIRATION);
+    final String username = authentication.getName();
+    final Date currentDate = new Date();
+    final Date expireDate = new Date(currentDate.getTime() + JwtSecurityConstants.JWT_EXPIRATION);
 
     return Jwts.builder()
         .subject(username)
@@ -66,8 +67,8 @@ class JwtUtilityTest {
 
   @Test
   void generateTokenTest() {
-    String tokenExpected = this.generateToken(this.authentication0);
-    String tokenActual = this.jwtUtility.generateToken(this.authentication0);
+    final String tokenExpected = this.generateToken(this.authentication0);
+    final String tokenActual = this.jwtUtility.generateToken(this.authentication0);
 
     assertEquals(tokenExpected, tokenActual);
   }
@@ -79,32 +80,32 @@ class JwtUtilityTest {
 
   @Test
   void getUsernameFromJwt() {
-    String tokenExpected = this.generateToken(this.authentication0);
+    final String tokenExpected = this.generateToken(this.authentication0);
 
     assertEquals(validUsername0, this.jwtUtility.getUsernameFromJwt(tokenExpected));
   }
 
   @Test
   void usernamesAreDifferentFromJwtTest() {
-    String token0 = this.generateToken(this.authentication0);
-    String token1 = this.generateToken(this.authentication1);
+    final String token0 = this.generateToken(this.authentication0);
+    final String token1 = this.generateToken(this.authentication1);
 
-    String tokenUsername0 = this.jwtUtility.getUsernameFromJwt(token0);
-    String tokenUsername1 = this.jwtUtility.getUsernameFromJwt(token1);
+    final String tokenUsername0 = this.jwtUtility.getUsernameFromJwt(token0);
+    final String tokenUsername1 = this.jwtUtility.getUsernameFromJwt(token1);
 
     assertNotEquals(tokenUsername0, tokenUsername1);
   }
 
   @Test
   void validatedTokenSuccess() {
-    String token = this.generateToken(this.authentication0);
+    final String token = this.generateToken(this.authentication0);
 
     assertDoesNotThrow(() -> this.jwtUtility.validateToken(token));
   }
 
   @Test
   void validateTokenFails() {
-    String token = "invalidToken";
+    final String token = "invalidToken";
 
     assertThrows(Exception.class, () -> this.jwtUtility.validateToken(token));
   }
