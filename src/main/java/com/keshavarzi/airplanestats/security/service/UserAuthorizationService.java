@@ -13,7 +13,7 @@ import com.keshavarzi.airplanestats.security.jwt.JwtUtility;
 import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.security.model.response.RegistrationResponse;
 import jakarta.annotation.Nonnull;
-import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +22,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /** Authorization logic is implemented in service. */
 @Service
 public class UserAuthorizationService {
-
   @Nonnull
   private static final Pattern VALID_EMAIL_ADDRESS =
       Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
@@ -36,7 +34,6 @@ public class UserAuthorizationService {
   @Nonnull private final AuthenticationManager authenticationManager;
   @Nonnull private final UserEntityRepository userEntityRepository;
   @Nonnull private final RoleEntityRepository roleEntityRepository;
-  @Nonnull private final PasswordEncoder passwordEncoder;
   @Nonnull private final JwtUtility jwtUtility;
 
   @Autowired
@@ -44,12 +41,10 @@ public class UserAuthorizationService {
       @Nonnull final AuthenticationManager authenticationManager,
       @Nonnull final UserEntityRepository userEntityRepository,
       @Nonnull final RoleEntityRepository roleEntityRepository,
-      @Nonnull final PasswordEncoder passwordEncoder,
       @Nonnull final JwtUtility jwtUtility) {
     this.authenticationManager = authenticationManager;
     this.userEntityRepository = userEntityRepository;
     this.roleEntityRepository = roleEntityRepository;
-    this.passwordEncoder = passwordEncoder;
     this.jwtUtility = jwtUtility;
   }
 
@@ -80,13 +75,8 @@ public class UserAuthorizationService {
     } else if (this.roleEntityRepository.findRoleEntityByRoleName("USER").isEmpty()) {
       throw new AuthorizationRoleMissingException("USER");
     } else {
-      UserEntity userEntity = new UserEntity();
-      userEntity.setUsername(username);
-      userEntity.setPassword(this.passwordEncoder.encode(password));
-
-      RoleEntity roles = this.roleEntityRepository.findRoleEntityByRoleName("USER").get();
-
-      userEntity.setRoleEntities(Collections.singletonList(roles));
+      final RoleEntity roles = this.roleEntityRepository.findRoleEntityByRoleName("USER").get();
+      final UserEntity userEntity = new UserEntity(username, password, List.of(roles));
       this.userEntityRepository.save(userEntity);
       return new RegistrationResponse("User created: " + username);
     }
@@ -104,11 +94,11 @@ public class UserAuthorizationService {
     this.userEntityRepository
         .findUserEntityByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-    Authentication authentication =
+    final Authentication authentication =
         this.authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(username, password));
     SecurityContextHolder.getContext().setAuthentication(authentication);
-    String token = this.jwtUtility.generateToken(authentication);
+    final String token = this.jwtUtility.generateToken(authentication);
     return new AuthorizationResponse(token, JwtSecurityConstants.TOKEN_PREFIX_BEARER, null);
   }
 }

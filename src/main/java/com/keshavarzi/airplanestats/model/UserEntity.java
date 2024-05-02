@@ -25,24 +25,41 @@ import lombok.Setter;
 /** Creates an object based plane-stats.user_data.user table. */
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(force = true)
 @Entity
 @Table(name = "user", schema = "user_data")
 public final class UserEntity {
+  /**
+   * Constructor for saving to database {@code plane-stats.user_data.user}.
+   *
+   * @param username User's email
+   * @param password Password for security
+   * @param roleEntities List of Spring Security Roles granted to user
+   */
+  public UserEntity(@Nonnull final String username,
+                    @Nonnull final String password,
+                    @Nonnull final Collection<RoleEntity> roleEntities) {
+    this.username = username;
+    this.password = password;
+    this.roleEntities = List.copyOf(roleEntities);
+    this.userId = this.getUserId();
+    this.savedRoutes = null;
+    this.savedTrips = null;
+  }
 
   @Id
   @Nonnull
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", table = "user", unique = true, nullable = false)
-  private Long userId;
+  private final Long userId;
 
   @Nonnull
   @Column(name = "username", table = "user", unique = true, nullable = false)
-  private String username;
+  private final String username;
 
   @Nonnull
   @Column(name = "password", table = "user", nullable = false)
-  private String password;
+  private final String password;
 
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
@@ -51,7 +68,7 @@ public final class UserEntity {
       targetEntity = RouteEntity.class,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
-  private Collection<RouteEntity> savedRoutes;
+  private final Collection<RouteEntity> savedRoutes;
 
   // Exclusion is because associations impact performance
   @Getter(AccessLevel.NONE)
@@ -61,9 +78,10 @@ public final class UserEntity {
       targetEntity = Trip.class,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
-  private Collection<Trip> savedTrips;
+  private final Collection<Trip> savedTrips;
 
   // Do not need to do it on the other entity, this table will be defined for both
+  @Nonnull
   @ManyToMany(fetch = FetchType.EAGER, targetEntity = RoleEntity.class)
   @JoinTable(
       name = "user_role",
@@ -82,19 +100,14 @@ public final class UserEntity {
               referencedColumnName = "id",
               nullable = false,
               foreignKey = @ForeignKey(name = "user_role_role_id_fk")))
-  private Collection<RoleEntity> roleEntities;
-
-  public Optional<Collection<RoleEntity>> getRoleEntities() {
-    return Optional.ofNullable(List.copyOf(this.roleEntities));
-  }
+  private final Collection<RoleEntity> roleEntities;
 
   /**
-   * A deep copy to set roleEntities field. Deep copy is to prevent unintentional/malicious changes
-   * through reference
+   * Getter for {@code RoleEntity objects}.
    *
-   * @param roleEntities list of role entities
+   * @return {@code RoleEntities} for a {@code UserEntity} or Empty Optional
    */
-  public void setRoleEntities(final Collection<RoleEntity> roleEntities) {
-    this.roleEntities = List.copyOf(roleEntities);
+  public Optional<Collection<RoleEntity>> getRoleEntities() {
+    return Optional.of(this.roleEntities);
   }
 }

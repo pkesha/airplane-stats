@@ -51,7 +51,7 @@ final class UserAuthorizationController {
       consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<RegistrationResponse> register(
       @NonNull @RequestBody final RegisterRequest registerRequest) {
-    String username = registerRequest.username();
+    final String username = registerRequest.username();
     try {
       return new ResponseEntity<>(
           this.userAuthorizationService.register(username, registerRequest.password()),

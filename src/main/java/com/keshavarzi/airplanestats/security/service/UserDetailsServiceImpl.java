@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
-
   private final UserEntityRepository userEntityRepository;
 
   /**
@@ -31,12 +30,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
    */
   @Override
   public UserDetails loadUserByUsername(@NonNull final String username) {
-    UserEntity userEntity =
+    final UserEntity userEntity =
         this.userEntityRepository
             .findUserEntityByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-    Collection<GrantedAuthority> grantedAuthoritiesToUser =
+    final Collection<GrantedAuthority> grantedAuthoritiesToUser =
         userEntity
             .getRoleEntities()
             .orElseThrow(

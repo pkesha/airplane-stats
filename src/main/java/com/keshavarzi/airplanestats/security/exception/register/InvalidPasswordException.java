@@ -2,8 +2,7 @@ package com.keshavarzi.airplanestats.security.exception.register;
 
 /** Custom Exception for invalid password/login attempt. */
 @SuppressWarnings({"CommentedOutCode", "GrazieInspection"})
-public class InvalidPasswordException extends Exception {
-
+public final class InvalidPasswordException extends Exception {
   /**
    * Constructs a new exception with {@code null} as its detail message. The cause is not
    * initialized, and may subsequently be initialized by a call to {@link #initCause}.

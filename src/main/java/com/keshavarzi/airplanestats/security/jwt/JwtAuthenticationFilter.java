@@ -7,6 +7,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +22,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public final class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Nonnull private final JwtUtility jwtUtility;
   @Nonnull private final UserDetailsServiceImpl userDetailsService;
+  private static final Logger logger =
+      LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
   @Autowired
   public JwtAuthenticationFilter(
@@ -51,19 +55,20 @@ public final class JwtAuthenticationFilter extends OncePerRequestFilter {
       @Nonnull final FilterChain filterChain)
       throws ServletException, IOException {
     try {
-      String token = this.getJwtFromRequest(request);
+      final String token = this.getJwtFromRequest(request);
       this.jwtUtility.validateToken(token);
-      String username = this.jwtUtility.getUsernameFromJwt(token);
-      UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-      UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+      final UserDetails userDetails = this.userDetailsService
+          .loadUserByUsername(this.jwtUtility.getUsernameFromJwt(token));
+      final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
           new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
       usernamePasswordAuthenticationToken.setDetails(
           new WebAuthenticationDetailsSource().buildDetails(request));
-      SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+      SecurityContextHolder.getContext()
+          .setAuthentication(usernamePasswordAuthenticationToken);
     } catch (
     AuthenticationCredentialsNotFoundException authenticationCredentialsNotFoundException) {
-      System.out.println(
-          "Authentication failed: " + authenticationCredentialsNotFoundException.getMessage());
+      logger.atError()
+          .log("Authentication failed: " + authenticationCredentialsNotFoundException.getMessage());
     } finally {
       filterChain.doFilter(request, response);
     }
@@ -76,7 +81,7 @@ public final class JwtAuthenticationFilter extends OncePerRequestFilter {
    * @return Bearer token to check
    */
   private String getJwtFromRequest(@Nonnull final HttpServletRequest request) {
-    String bearerToken = request.getHeader(JwtSecurityConstants.AUTHORIZATION_HEADER);
+    final String bearerToken = request.getHeader(JwtSecurityConstants.AUTHORIZATION_HEADER);
     if (StringUtils.hasText(bearerToken)
         && bearerToken.startsWith(JwtSecurityConstants.TOKEN_PREFIX_BEARER)) {
       return bearerToken.substring(7);

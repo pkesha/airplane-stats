@@ -15,6 +15,8 @@ import com.keshavarzi.airplanestats.security.jwt.JwtSecurityConstants;
 import com.keshavarzi.airplanestats.security.jwt.JwtUtility;
 import com.keshavarzi.airplanestats.security.model.response.AuthorizationResponse;
 import com.keshavarzi.airplanestats.security.model.response.RegistrationResponse;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +55,6 @@ public class UserAuthorizationServiceTest {
             this.authenticationManager,
             this.userEntityRepository,
             this.roleEntityRepository,
-            this.passwordEncoder,
             this.jwtUtility);
   }
 
@@ -65,12 +66,8 @@ public class UserAuthorizationServiceTest {
    * @return UserEntity object
    */
   private UserEntity createUserEntity(String username, String password) {
-    UserEntity userEntity = new UserEntity();
-    userEntity.setUserId(1L);
-    userEntity.setUsername(username);
-    userEntity.setPassword(password);
-
-    return userEntity;
+    Collection<RoleEntity> roleEntities = List.of(new RoleEntity());
+    return new UserEntity(username, password, roleEntities);
   }
 
   private RoleEntity createUserRoleEntity() {

@@ -16,6 +16,7 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -23,18 +24,17 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor(force = true)
 @Entity
 @Table(name = "trip", schema = "user_data")
 public final class Trip {
-
   @Id
   @Nonnull
   @Column(name = "id", table = "trip", unique = true, nullable = false)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long tripId;
+  private final Long tripId;
 
   @Nonnull
-  @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
   @ManyToOne(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
   @JoinColumn(
@@ -44,20 +44,20 @@ public final class Trip {
       nullable = false,
       unique = true,
       foreignKey = @ForeignKey(name = "trip_user_id_fk"))
-  private UserEntity userEntity;
+  private final UserEntity userEntity;
 
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
   @ToString.Exclude
   @OneToMany(mappedBy = "trip", targetEntity = RouteEntity.class, orphanRemoval = true)
-  private Collection<RouteEntity> routeEntities;
+  private final Collection<RouteEntity> routeEntities;
 
   @Column(name = "trip_name", table = "trip")
-  private String tripName;
+  private final String tripName;
 
   @Column(name = "trip_start", table = "trip")
-  private ZonedDateTime tripStart;
+  private final ZonedDateTime tripStart;
 
   @Column(name = "trip_end", table = "trip")
-  private ZonedDateTime tripEnd;
+  private final ZonedDateTime tripEnd;
 }

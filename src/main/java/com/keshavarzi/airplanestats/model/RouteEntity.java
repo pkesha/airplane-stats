@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -20,6 +21,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor(force = true)
 @Entity
 @Table(name = "route", schema = "user_data")
 public final class RouteEntity {
@@ -27,7 +29,7 @@ public final class RouteEntity {
   @Nonnull
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", table = "route", unique = true, nullable = false)
-  private Long routeId;
+  private final Long routeId;
 
   // Returning a reference to a mutable object value stored in one of the object's fields exposes
   // the internal representation of the object.
@@ -44,7 +46,7 @@ public final class RouteEntity {
       nullable = false,
       unique = true,
       foreignKey = @ForeignKey(name = "route_user_id_fk"))
-  private UserEntity userEntity;
+  private final UserEntity userEntity;
 
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
@@ -54,20 +56,20 @@ public final class RouteEntity {
       referencedColumnName = "id",
       table = "route",
       foreignKey = @ForeignKey(name = "route_trip_trip_id_fk"))
-  private Trip trip;
+  private final Trip trip;
 
   @Column(name = "flight_number", table = "route")
-  private String flightNumber;
+  private final String flightNumber;
 
   @Column(name = "origin", table = "route")
-  private String origin;
+  private final String origin;
 
   @Column(name = "destination", table = "route")
-  private String destination;
+  private final String destination;
 
   @Column(name = "airplane_model", table = "route")
-  private String airplaneModel;
+  private final String airplaneModel;
 
   @Column(name = "airline", table = "route")
-  private String airline;
+  private final String airline;
 }
