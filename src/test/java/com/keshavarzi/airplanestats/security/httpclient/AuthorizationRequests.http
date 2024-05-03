@@ -1,0 +1,19 @@
+### Register a user
+POST http://localhost:8080/api/user/authorization/register
+Content-Type: application/json
+
+{
+  "username": "rokhak@test.com",
+  "password": "password"
+}
+
+### Login without Token
+# @no-cookie-jar
+POST http://localhost:8080/api/user/authorization/login
+Content-Type: application/json
+
+{
+  "username": "test9@test.com",
+  "password": "password",
+  "token": null
+}
